@@ -70,6 +70,53 @@ class LossConfig:
     charbonnier_eps: float = 1e-3
 
 
+# ---------------------------------------------------------------------------
+# Parameter group learning rate multipliers
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ParamGroupConfig:
+    """
+    Per-parameter-group learning rate multipliers.
+
+    The effective lr for each parameter group is:
+        effective_lr = base_lr * multiplier
+
+    For example, setting center_lr_scale=2.0 means the center parameters
+    learn at twice the base learning rate.
+    """
+
+    center_lr_scale: float = 1.0
+    scale_lr_scale: float = 1.0
+    angle_lr_scale: float = 1.0
+    alpha_lr_scale: float = 1.0
+    color_lr_scale: float = 1.0
+
+
+# ---------------------------------------------------------------------------
+# Learning rate scheduler
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SchedulerConfig:
+    """
+    Learning rate scheduler settings.
+
+    The scheduler returns a multiplier in [min_lr_scale, 1.0] applied to all
+    parameter group learning rates each step.
+    """
+
+    name: str = "constant"
+    min_lr_scale: float = 0.01
+    warmup_steps: int = 0
+    step_size: int = 100
+    gamma: float = 0.5
+
+
+# ---------------------------------------------------------------------------
+# Optimizer configs
+# ---------------------------------------------------------------------------
+
 @dataclass
 class TorchAdamConfig:
     lr: float = 5e-2
@@ -81,6 +128,12 @@ class TorchAdamConfig:
 @dataclass
 class StudentSGDConfig:
     lr: float = 5e-2
+
+
+@dataclass
+class StudentMomentumConfig:
+    lr: float = 5e-2
+    momentum: float = 0.9
 
 
 @dataclass
@@ -124,16 +177,23 @@ class OptimizerConfig:
     Students should usually only change:
     - name
     - the sub-config that matches that name
+    - param_groups (per-parameter learning rate multipliers)
     """
 
     name: str = "torch_adam"
+    param_groups: ParamGroupConfig = field(default_factory=ParamGroupConfig)
     torch_adam: TorchAdamConfig = field(default_factory=TorchAdamConfig)
     student_sgd: StudentSGDConfig = field(default_factory=StudentSGDConfig)
+    student_momentum: StudentMomentumConfig = field(default_factory=StudentMomentumConfig)
     student_adam: StudentAdamConfig = field(default_factory=StudentAdamConfig)
     student_adamw: StudentAdamWConfig = field(default_factory=StudentAdamWConfig)
     student_muon: StudentMuonConfig = field(default_factory=StudentMuonConfig)
     student_newton: StudentNewtonConfig = field(default_factory=StudentNewtonConfig)
 
+
+# ---------------------------------------------------------------------------
+# Initializer configs
+# ---------------------------------------------------------------------------
 
 @dataclass
 class RandomInitConfig:
@@ -232,6 +292,7 @@ class Config:
     - target
     - model
     - optimizer
+    - scheduler
     - initializer
     - loss
     - train
@@ -244,6 +305,7 @@ class Config:
     train: TrainLoopConfig = field(default_factory=TrainLoopConfig)
     loss: LossConfig = field(default_factory=LossConfig)
     optimizer: OptimizerConfig = field(default_factory=OptimizerConfig)
+    scheduler: SchedulerConfig = field(default_factory=SchedulerConfig)
     initializer: InitializerConfig = field(default_factory=InitializerConfig)
     evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
     visualization: VisualizationConfig = field(default_factory=VisualizationConfig)

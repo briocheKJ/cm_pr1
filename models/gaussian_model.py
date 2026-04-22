@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from config import ParamGroupConfig
+
 
 def inverse_sigmoid(x: torch.Tensor) -> torch.Tensor:
     x = x.clamp(1e-4, 1.0 - 1e-4)
@@ -60,6 +62,22 @@ class Gaussian2DModel(nn.Module):
             alphas=alphas,
             colors=colors,
         )
+
+    def get_param_groups(self, base_lr: float, group_config: ParamGroupConfig) -> list[dict]:
+        """
+        Build parameter groups with per-group learning rates.
+
+        Each group contains one parameter tensor and its effective learning rate.
+        This allows the optimizer to use different learning rates for
+        position, scale, rotation, opacity, and color.
+        """
+        return [
+            {"name": "center", "params": [self.center_raw], "lr": base_lr * group_config.center_lr_scale, "base_lr": base_lr * group_config.center_lr_scale},
+            {"name": "scale",  "params": [self.scale_raw],  "lr": base_lr * group_config.scale_lr_scale,  "base_lr": base_lr * group_config.scale_lr_scale},
+            {"name": "angle",  "params": [self.angle_raw],  "lr": base_lr * group_config.angle_lr_scale,  "base_lr": base_lr * group_config.angle_lr_scale},
+            {"name": "alpha",  "params": [self.alpha_raw],  "lr": base_lr * group_config.alpha_lr_scale,  "base_lr": base_lr * group_config.alpha_lr_scale},
+            {"name": "color",  "params": [self.color_raw],  "lr": base_lr * group_config.color_lr_scale,  "base_lr": base_lr * group_config.color_lr_scale},
+        ]
 
     def set_raw_parameters(
         self,

@@ -14,23 +14,26 @@ class StudentSGD:
 
     SGD update rule:
         param = param - lr * grad
+
+    Note: each parameter group has its own learning rate (group["lr"]).
     """
 
-    def __init__(self, params, lr: float) -> None:
-        self.params = list(params)
-        self.lr = lr
+    def __init__(self, param_groups: list[dict]) -> None:
+        self.param_groups = param_groups
 
     def zero_grad(self) -> None:
-        for param in self.params:
-            if param.grad is not None:
-                param.grad.zero_()
+        for group in self.param_groups:
+            for param in group["params"]:
+                if param.grad is not None:
+                    param.grad.zero_()
 
     def step(self) -> None:
         """
         TODO: implement the SGD parameter update.
 
-        For each parameter with a gradient:
-            param = param - lr * grad
+        For each parameter group (use group["lr"] as the learning rate):
+            For each parameter with a gradient:
+                param = param - lr * grad
 
         Hint: use torch.no_grad() context and in-place operations.
         """

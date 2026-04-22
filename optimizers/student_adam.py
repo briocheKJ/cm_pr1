@@ -18,31 +18,37 @@ class StudentAdam:
         m_hat = m / (1 - beta1^t)
         v_hat = v / (1 - beta2^t)
         param = param - lr * m_hat / (sqrt(v_hat) + eps)
+
+    Note: each parameter group has its own learning rate (group["lr"]).
     """
 
     def __init__(
         self,
-        params,
-        lr: float,
+        param_groups: list[dict],
         beta1: float = 0.9,
         beta2: float = 0.999,
         eps: float = 1e-8,
     ) -> None:
-        self.params = list(params)
-        self.lr = lr
+        self.param_groups = param_groups
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = eps
         self.step_count = 0
 
-        # First moment (mean of gradients) and second moment (mean of squared gradients).
-        self.m = [torch.zeros_like(param) for param in self.params]
-        self.v = [torch.zeros_like(param) for param in self.params]
+        # Per-parameter state: first moment (m) and second moment (v).
+        self.state: dict[int, dict[str, torch.Tensor]] = {}
+        for group in self.param_groups:
+            for param in group["params"]:
+                self.state[id(param)] = {
+                    "m": torch.zeros_like(param),
+                    "v": torch.zeros_like(param),
+                }
 
     def zero_grad(self) -> None:
-        for param in self.params:
-            if param.grad is not None:
-                param.grad.zero_()
+        for group in self.param_groups:
+            for param in group["params"]:
+                if param.grad is not None:
+                    param.grad.zero_()
 
     def step(self) -> None:
         """
@@ -50,14 +56,16 @@ class StudentAdam:
 
         Steps:
         1. Increment self.step_count
-        2. For each parameter with a gradient:
-           a. Update first moment:  m = beta1 * m + (1 - beta1) * grad
-           b. Update second moment: v = beta2 * v + (1 - beta2) * grad^2
-           c. Bias correction:      m_hat = m / (1 - beta1^t)
-                                    v_hat = v / (1 - beta2^t)
-           d. Update parameter:     param -= lr * m_hat / (sqrt(v_hat) + eps)
+        2. For each parameter group (use group["lr"] as the learning rate):
+           For each parameter with a gradient:
+               a. Get state: s = self.state[id(param)]
+               b. Update first moment:  s["m"] = beta1 * s["m"] + (1 - beta1) * grad
+               c. Update second moment: s["v"] = beta2 * s["v"] + (1 - beta2) * grad^2
+               d. Bias correction:      m_hat = s["m"] / (1 - beta1^t)
+                                         v_hat = s["v"] / (1 - beta2^t)
+               e. Update parameter:     param -= lr * m_hat / (sqrt(v_hat) + eps)
 
-        Hint: use torch.no_grad() context and in-place operations.
+        Hint: use torch.no_grad() context.
         """
         raise NotImplementedError(
             "TODO: implement Adam step(). See the docstring above for the update rule."

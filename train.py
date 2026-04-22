@@ -11,6 +11,7 @@ from losses import build_loss
 from models import Gaussian2DModel
 from optimizers import build_optimizer
 from renderer import GaussianRenderer
+from schedulers import build_scheduler
 from target_generators import build_target_generator
 from utils import (
     build_animation_from_frames,
@@ -23,12 +24,18 @@ from utils import (
 )
 
 
+def _apply_scheduler(optimizer, lr_scale: float) -> None:
+    """Update learning rates in all parameter groups by scaling from base_lr."""
+    for group in optimizer.param_groups:
+        group["lr"] = group["base_lr"] * lr_scale
+
+
 def train(config: Config) -> None:
     """
     Run the default 2DGS training loop.
 
     This function intentionally keeps the whole pipeline visible:
-    target -> model -> renderer -> loss -> optimizer.
+    target -> model -> renderer -> loss -> optimizer -> scheduler.
     """
     set_seed(config.system.seed)
 
@@ -55,11 +62,9 @@ def train(config: Config) -> None:
         use_anisotropic=config.model.use_anisotropic,
         use_alpha=config.model.use_alpha,
     )
-    optimizer = build_optimizer(
-        params=model.parameters(),
-        config=config.optimizer,
-    )
+    optimizer = build_optimizer(model=model, config=config.optimizer)
     loss_fn = build_loss(config.loss)
+    scheduler = build_scheduler(config.scheduler)
 
     losses: list[float] = []
 
@@ -71,10 +76,14 @@ def train(config: Config) -> None:
     print(f"Target generator: {config.target.name}")
     print(f"Initializer: {config.initializer.name}")
     print(f"Optimizer: {config.optimizer.name}")
+    print(f"Scheduler: {config.scheduler.name}")
     print(f"Loss: {config.loss.name}")
     print(f"Save video: {config.visualization.save_video}")
 
     for step in range(1, config.train.num_steps + 1):
+        lr_scale = scheduler(step, config.train.num_steps)
+        _apply_scheduler(optimizer, lr_scale)
+
         optimizer.zero_grad()
 
         render_params = model.get_render_params()

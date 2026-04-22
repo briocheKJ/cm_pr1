@@ -23,6 +23,14 @@ def get_sprint_config() -> Config:
     config.optimizer.torch_adam.lr = 5e-2
     config.model.use_anisotropic = True
     config.model.use_alpha = True
+    # --- Scheduler ---
+    config.scheduler.name = "constant"          # try: "cosine", "warmup_cosine", "step_decay"
+    # config.scheduler.min_lr_scale = 0.01
+    # config.scheduler.warmup_steps = 10        # for warmup_cosine
+    # --- Param group lr scales ---
+    # config.optimizer.param_groups.center_lr_scale = 1.0
+    # config.optimizer.param_groups.scale_lr_scale = 1.0
+    # config.optimizer.param_groups.color_lr_scale = 1.0
     return config
 
 
@@ -42,4 +50,12 @@ def get_standard_config() -> Config:
     config.optimizer.torch_adam.lr = 5e-2
     config.model.use_anisotropic = True
     config.model.use_alpha = True
+    # --- Scheduler ---
+    config.scheduler.name = "constant"          # try: "cosine", "warmup_cosine", "step_decay"
+    # config.scheduler.min_lr_scale = 0.01
+    # config.scheduler.warmup_steps = 50        # for warmup_cosine
+    # --- Param group lr scales ---
+    # config.optimizer.param_groups.center_lr_scale = 1.0
+    # config.optimizer.param_groups.scale_lr_scale = 1.0
+    # config.optimizer.param_groups.color_lr_scale = 1.0
     return config

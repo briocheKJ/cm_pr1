@@ -10,7 +10,7 @@
 python main.py
 ```
 
-基线使用 MSE loss、PyTorch Adam 优化器、随机初始化，可以产生一个初步的拟合结果。
+基线使用 MSE loss、PyTorch Adam 优化器、随机初始化、恒定学习率，可以产生一个初步的拟合结果。
 
 **你的任务是**：实现缺失的模块，然后通过消融实验验证每个模块的作用，最后在竞赛中追求最高 PSNR。
 
@@ -18,12 +18,14 @@ python main.py
 
 ## 基线代码已提供的模块
 
-| 模块       | 已提供               | 需要你实现             |
-| ---------- | -------------------- | ---------------------- |
-| Loss       | `mse`                | 至少 2 种其他 loss      |
-| Optimizer  | `torch_adam`（PyTorch 内置） | `student_sgd`, `student_adam` |
-| Initializer| `random`             | 至少 1 种图像感知初始化  |
-| Model      | 各向异性/透明度开关已内置 | 无需实现，仅需对比分析  |
+| 模块       | 已提供                          | 需要你实现                       |
+| ---------- | ------------------------------- | -------------------------------- |
+| Loss       | `mse`                           | 至少 2 种其他 loss                |
+| Optimizer  | `torch_adam`（PyTorch 内置）     | `student_sgd`, `student_momentum`, `student_adam` |
+| Scheduler  | `constant`（不调度）             | 至少 1 种调度器（如 cosine）      |
+| Initializer| `random`                        | 至少 1 种图像感知初始化           |
+| Model      | 各向异性/透明度开关已内置         | 无需实现，仅需对比分析            |
+| 参数分组    | 接口已内置                       | 无需实现，仅需调参对比            |
 
 ---
 
@@ -46,6 +48,7 @@ config.target.name = "image"  # Starry Night
 config.loss.name = "mse"
 config.optimizer.name = "torch_adam"
 config.optimizer.torch_adam.lr = 5e-2
+config.scheduler.name = "constant"
 config.initializer.name = "random"
 config.model.use_anisotropic = True
 config.model.use_alpha = True
@@ -53,7 +56,7 @@ config.model.use_alpha = True
 
 你需要自己编写实验脚本来批量运行不同配置、收集结果、生成对比图表。这本身也是实验能力的一部分。
 
-### 消融 A：Loss 函数（15 分）
+### 消融 A：Loss 函数（12 分）
 
 **实现要求**：在 `losses.py` 中实现至少 2 种新的 loss 函数，并在 `build_loss` 中注册。
 
@@ -73,7 +76,7 @@ config.model.use_alpha = True
 - loss 曲线对比图
 - 文字分析（不超过 300 字）：哪个 loss 效果最好？为什么不同 loss 表现不同？
 
-### 消融 B：初始化策略（15 分）
+### 消融 B：初始化策略（12 分）
 
 **实现要求**：在 `initializers/` 下实现至少 1 种图像感知初始化策略，并在 `initializers/factory.py` 中注册。
 
@@ -96,29 +99,36 @@ config.model.use_alpha = True
 - loss 曲线对比图（重点观察前 50 步的收敛速度差异）
 - 文字分析（不超过 300 字）：图像感知初始化的优势体现在哪里？
 
-### 消融 C：优化器（15 分）
+### 消融 C：优化器（12 分）
 
-**实现要求**：补全 `optimizers/student_sgd.py` 和 `optimizers/student_adam.py`。
+**实现要求**：补全以下三个优化器文件：
 
-参考 `optimizers/custom_optimizer_template.py` 了解接口。优化器需要实现 `zero_grad()` 和 `step()` 两个方法。
+- `optimizers/student_sgd.py` — 最基础的梯度下降
+- `optimizers/student_momentum.py` — SGD + 动量，收敛加速的关键一步
+- `optimizers/student_adam.py` — 自适应学习率 + 动量
 
-| 编号 | Optimizer       | 说明                          |
-| ---- | --------------- | ----------------------------- |
-| C1   | `torch_adam`    | PyTorch 内置 Adam（已提供，作为基线） |
-| C2   | `student_sgd`   | 你实现的 SGD                   |
-| C3   | `student_adam`  | 你实现的 Adam                  |
+优化器的进阶路线：**SGD → SGD + Momentum → Adam**，每一步都引入一个核心改进。
+
+参考 `optimizers/custom_optimizer_template.py` 了解接口。优化器需要实现 `zero_grad()` 和 `step()` 两个方法。注意每个参数组有独立的学习率 `group["lr"]`。
+
+| 编号 | Optimizer         | 说明                                |
+| ---- | ----------------- | ----------------------------------- |
+| C1   | `torch_adam`      | PyTorch 内置 Adam（已提供，作为基线）|
+| C2   | `student_sgd`     | 你实现的 SGD                        |
+| C3   | `student_momentum`| 你实现的 SGD + Momentum             |
+| C4   | `student_adam`    | 你实现的 Adam                       |
 
 **消融实验**：固定其他模块为基线，仅替换优化器。
 
 **正确性验证**：`student_adam` 和 `torch_adam` 在相同配置下的 PSNR 差异应小于 0.5 dB。如果差异过大，说明实现可能有误。
 
 **需要提交：**
-- 你实现的优化器代码
+- 你实现的三个优化器代码
 - 各组实验的 PSNR 数值表格
 - loss 曲线对比图
-- 文字分析（不超过 300 字）：SGD 和 Adam 在此任务上的表现差异及原因分析；你的 `student_adam` 与 `torch_adam` 是否一致？
+- 文字分析（不超过 300 字）：SGD → Momentum → Adam 每一步带来了什么改进？Momentum 相比纯 SGD 提升了多少？你的 `student_adam` 与 `torch_adam` 是否一致？
 
-### 消融 D：模型设计（15 分）
+### 消融 D：模型设计（12 分）
 
 **无需实现代码**，仅需修改配置对比 4 种组合：
 
@@ -135,6 +145,30 @@ config.model.use_alpha = True
 - 4 组实验的 PSNR 数值表格
 - 最终重建结果的视觉对比图
 - 文字分析（不超过 300 字）：各向异性和透明度各自带来多少 PSNR 提升？哪个影响更大？二者是否互补？
+
+### 消融 E：学习率调度器（12 分）
+
+**实现要求**：在 `schedulers.py` 中实现至少 1 种学习率调度器。
+
+调度器是一个函数 `(step, total_steps) -> lr_multiplier`，返回值在 `[min_lr_scale, 1.0]` 之间，每步乘以所有参数组的 base_lr。
+
+建议实现：
+
+| 编号 | Scheduler       | 说明                                   |
+| ---- | --------------- | -------------------------------------- |
+| E1   | `constant`      | 不调度（已提供，作为基线）               |
+| E2   | `cosine`        | 余弦退火                                |
+| E3   | `warmup_cosine` | 线性预热 + 余弦退火（bonus）             |
+
+**cosine 公式**：`scale = min_scale + 0.5 * (1 - min_scale) * (1 + cos(pi * step / total))`
+
+**消融实验**：固定其他模块为基线，仅替换调度器。
+
+**需要提交：**
+- 你实现的调度器代码
+- 各组实验的 PSNR 数值表格
+- loss 曲线对比图（观察后期收敛行为的差异）
+- 文字分析（不超过 300 字）：调度器对最终 PSNR 有多大影响？在什么训练阶段起关键作用？
 
 ---
 
@@ -157,15 +191,23 @@ config.model.use_alpha = True
 
 | 赛道            | 训练步数 | 侧重点         |
 | --------------- | -------- | --------------- |
-| Sprint（���刺）   | 100 步   | 快速收敛能力     |
+| Sprint（冲刺）   | 100 步   | 快速收敛能力     |
 | Standard（标准） | 500 步   | 整体拟合质量     |
 
 **可调节的内容：**
 - Loss 函数及其超参数
 - 初始化策略及其超参数
 - 优化器及其超参数（学习率、动量等）
+- 学习率调度器及其超参数
+- 参数分组学习率倍率（`config.optimizer.param_groups`）
 - 模型设计开关（各向异性、透明度）
-- 可以自己实现新的优化器、初始化策略或 loss 函数
+- 可以自己实现新的优化器、初始化策略、loss 函数或调度器
+
+**竞赛策略提示**：
+- Sprint 赛道只有 100 步，初始化质量和学习率策略至关重要
+- 参数分组可以让位置参数学得更快、颜色参数学得更稳
+- 调度器可以在训练后期精细调整
+- 不同的图像类型（真实图 vs 合成高斯）可能适合不同的策略
 
 ### 测试图像
 
@@ -211,12 +253,12 @@ config.model.use_alpha = True
 python experiments/run_competition.py --config experiments/my_competition_config.py
 ```
 
-脚本会依次在 5 张测试图上运行你的配置，输出每张图的 PSNR 和平均 PSNR。
+脚本会依次在 10 张测试图上运行你的配置，输出每张图的 PSNR 和平均 PSNR。
 
 ### 提交要求
 
 1. 提交 `my_competition_config.py`，包含两个函数（见下方模板）
-2. 如有自定义模块（优化器 / 初始化 / loss），一并提交源文件
+2. 如有自定义模块（优化器 / 初始化 / loss / 调度器），一并提交源文件
 3. 简短说明（不超过 500 字）：你的配置策略和选择理由
 
 ### 提交模板
@@ -239,6 +281,9 @@ def get_sprint_config() -> Config:
     config.initializer.name = "random"
     config.optimizer.name = "torch_adam"
     config.optimizer.torch_adam.lr = 5e-2
+    config.scheduler.name = "constant"
+    config.optimizer.param_groups.center_lr_scale = 1.0
+    config.optimizer.param_groups.color_lr_scale = 1.0
     config.model.use_anisotropic = True
     config.model.use_alpha = True
     return config
@@ -258,6 +303,9 @@ def get_standard_config() -> Config:
     config.initializer.name = "random"
     config.optimizer.name = "torch_adam"
     config.optimizer.torch_adam.lr = 5e-2
+    config.scheduler.name = "constant"
+    config.optimizer.param_groups.center_lr_scale = 1.0
+    config.optimizer.param_groups.color_lr_scale = 1.0
     config.model.use_anisotropic = True
     config.model.use_alpha = True
     return config
@@ -267,12 +315,13 @@ def get_standard_config() -> Config:
 
 ## 总评分
 
-| 部分              | 满分 |
-| ----------------- | ---- |
-| 消融 A：Loss 函数  | 15   |
-| 消融 B：初始化策略  | 15   |
-| 消融 C：优化器     | 15   |
-| 消融 D：模型设计   | 15   |
-| 竞赛 Sprint 赛道   | 20   |
-| 竞赛 Standard 赛道 | 20   |
-| **合计**          | **100** |
+| 部分                  | 满分 |
+| --------------------- | ---- |
+| 消融 A：Loss 函数      | 12   |
+| 消融 B：初始化策略      | 12   |
+| 消融 C：优化器         | 12   |
+| 消融 D：模型设计       | 12   |
+| 消融 E：学习率调度器    | 12   |
+| 竞赛 Sprint 赛道       | 20   |
+| 竞赛 Standard 赛道     | 20   |
+| **合计**              | **100** |

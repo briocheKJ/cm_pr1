@@ -1,33 +1,44 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-
-import torch
-
 from config import OptimizerConfig
 from mode import is_teacher
+from models import Gaussian2DModel
 from optimizers.torch_baselines import build_torch_adam
 
 
-def build_optimizer(
-    params: Iterable[torch.nn.Parameter],
-    config: OptimizerConfig,
-):
+def _get_base_lr(config: OptimizerConfig) -> float:
+    """Extract the base learning rate for the selected optimizer."""
+    name = config.name
+    if name == "torch_adam":
+        return config.torch_adam.lr
+    if name == "student_sgd":
+        return config.student_sgd.lr
+    if name == "student_momentum":
+        return config.student_momentum.lr
+    if name == "student_adam":
+        return config.student_adam.lr
+    if name == "student_adamw":
+        return config.student_adamw.lr
+    if name == "student_muon":
+        return config.student_muon.lr
+    if name == "student_newton":
+        return config.student_newton.lr
+    raise ValueError(f"Unknown optimizer name: {name}")
+
+
+def build_optimizer(model: Gaussian2DModel, config: OptimizerConfig):
     """
     Create an optimizer from a short name.
 
-    Supported today:
-    - torch_adam       (provided baseline)
-    - student_sgd      (student TODO)
-    - student_adam     (student TODO)
-    - student_adamw    (student TODO)
-    - student_muon     (student TODO, bonus)
-    - student_newton   (student TODO, bonus)
+    The model's parameters are split into groups with per-group learning rates
+    based on config.param_groups.
     """
     name = config.name
+    base_lr = _get_base_lr(config)
+    param_groups = model.get_param_groups(base_lr, config.param_groups)
 
     if name == "torch_adam":
-        return build_torch_adam(params=params, config=config.torch_adam)
+        return build_torch_adam(param_groups=param_groups, config=config.torch_adam)
 
     # --- student_sgd ---
     if name == "student_sgd":
@@ -35,7 +46,18 @@ def build_optimizer(
             from _teacher_solutions.student_sgd import StudentSGD
         else:
             from optimizers.student_sgd import StudentSGD
-        return StudentSGD(params=params, lr=config.student_sgd.lr)
+        return StudentSGD(param_groups=param_groups)
+
+    # --- student_momentum ---
+    if name == "student_momentum":
+        if is_teacher():
+            from _teacher_solutions.student_momentum import StudentMomentum
+        else:
+            from optimizers.student_momentum import StudentMomentum
+        return StudentMomentum(
+            param_groups=param_groups,
+            momentum=config.student_momentum.momentum,
+        )
 
     # --- student_adam ---
     if name == "student_adam":
@@ -44,8 +66,7 @@ def build_optimizer(
         else:
             from optimizers.student_adam import StudentAdam
         return StudentAdam(
-            params=params,
-            lr=config.student_adam.lr,
+            param_groups=param_groups,
             beta1=config.student_adam.beta1,
             beta2=config.student_adam.beta2,
             eps=config.student_adam.eps,
@@ -58,8 +79,7 @@ def build_optimizer(
         else:
             from optimizers.student_adamw import StudentAdamW
         return StudentAdamW(
-            params=params,
-            lr=config.student_adamw.lr,
+            param_groups=param_groups,
             beta1=config.student_adamw.beta1,
             beta2=config.student_adamw.beta2,
             eps=config.student_adamw.eps,
@@ -73,8 +93,7 @@ def build_optimizer(
         else:
             from optimizers.student_muon import StudentMuon
         return StudentMuon(
-            params=params,
-            lr=config.student_muon.lr,
+            param_groups=param_groups,
             momentum=config.student_muon.momentum,
             weight_decay=config.student_muon.weight_decay,
             ns_steps=config.student_muon.ns_steps,
@@ -88,16 +107,9 @@ def build_optimizer(
         else:
             from optimizers.student_newton import StudentNewton
         return StudentNewton(
-            params=params,
-            lr=config.student_newton.lr,
+            param_groups=param_groups,
             damping=config.student_newton.damping,
             max_curvature=config.student_newton.max_curvature,
-        )
-
-    if name == "student_momentum":
-        raise NotImplementedError(
-            f"Optimizer '{name}' is reserved for student implementations. "
-            "Add the implementation under optimizers/ and register it here."
         )
 
     raise ValueError(f"Unknown optimizer name: {name}")

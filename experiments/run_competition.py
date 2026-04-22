@@ -29,10 +29,11 @@ from evaluation import evaluate_prediction
 from initializers import build_initializer
 from losses import build_loss
 from models import Gaussian2DModel
+from mode import set_mode
 from optimizers import build_optimizer
 from renderer import GaussianRenderer
+from schedulers import build_scheduler
 from target_generators import build_target_generator
-from mode import set_mode
 from utils import ensure_dir, resolve_device, save_image, set_seed
 
 
@@ -169,10 +170,15 @@ def run_single(config: Config, test_image: dict, output_dir: Path) -> float:
         use_anisotropic=config.model.use_anisotropic,
         use_alpha=config.model.use_alpha,
     )
-    optimizer = build_optimizer(params=model.parameters(), config=config.optimizer)
+    optimizer = build_optimizer(model=model, config=config.optimizer)
     loss_fn = build_loss(config.loss)
+    scheduler = build_scheduler(config.scheduler)
 
     for step in range(1, config.train.num_steps + 1):
+        lr_scale = scheduler(step, config.train.num_steps)
+        for group in optimizer.param_groups:
+            group["lr"] = group["base_lr"] * lr_scale
+
         optimizer.zero_grad()
         render_params = model.get_render_params()
         prediction = renderer.render(render_params)

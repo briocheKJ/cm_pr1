@@ -1,461 +1,223 @@
-# Minimal 2DGS Starter Code
+# 2D 高斯溅射图像拟合 — 计算方法课程设计
 
-This project is a teaching-oriented starter code for a simple 2D Gaussian Splatting image fitting task.
+本项目是一个面向本科生的 2D Gaussian Splatting 图像拟合教学框架。给定一张目标图像，系统使用一组可微分的 2D 高斯函数逐步逼近它。
 
-The default baseline does one thing:
-
-- use a fixed `256x256` cropped version of Van Gogh's *Starry Night*
-- fit it with a fixed number of isotropic 2D Gaussians
-- render with normalized weighted average blending
-- optimize with PyTorch Adam
-- save the target image, intermediate reconstructions, the final reconstruction, the loss curve, and evaluation summaries
-
-The code is intentionally modular, but still small enough for undergraduate students to read.
-
-## Directory Structure
-
-```text
-minimal_2dgs/
-├── README.md
-├── requirements.txt
-├── main.py
-├── generate_target.py
-├── config.py
-├── train.py
-├── losses.py
-├── utils.py
-├── renderer/
-│   ├── __init__.py
-│   └── gaussian_renderer.py
-├── models/
-│   ├── __init__.py
-│   └── gaussian_model.py
-├── target_generators/
-│   ├── __init__.py
-│   ├── factory.py
-│   ├── image_target_generator.py
-│   ├── synthetic_shapes_generator.py
-│   ├── txt_gaussian_generator.py
-│   └── custom_target_generator_template.py
-├── optimizers/
-│   ├── __init__.py
-│   ├── factory.py
-│   ├── torch_baselines.py
-│   ├── student_sgd.py
-│   ├── student_adam.py
-│   ├── student_adamw.py
-│   ├── student_muon.py
-│   ├── student_newton.py
-│   └── custom_optimizer_template.py
-├── initializers/
-│   ├── __init__.py
-│   ├── factory.py
-│   ├── random_init.py
-│   ├── grid_init.py
-│   ├── image_sample_init.py
-│   ├── bright_spot_init.py
-│   └── custom_initializer_template.py
-├── data/
-│   ├── .gitkeep
-│   ├── Starry_Night_256.png
-│   └── sample_two_gaussians.txt
-├── outputs/
-│   └── .gitkeep
-├── tests/
-│   └── .gitkeep
-└── smoke_test.py
-```
-
-## What The Baseline Does
-
-The default setting uses:
-
-- `config.target.name = "image"`
-- `config.loss.name = "mse"`
-- `config.optimizer.name = "torch_adam"`
-- `config.initializer.name = "random"`
-- `config.train.num_steps = 200`
-- a center-cropped `256x256` RGB target image
-- `100` isotropic Gaussians
-
-Each Gaussian has:
-
-- center: `(x, y)`
-- scale: `sigma`
-- color: `(r, g, b)`
-
-The model stores raw trainable parameters and maps them to valid values:
-
-- `center = sigmoid(center_raw)`
-- `sigma = softplus(scale_raw) + 1e-4`
-- `rgb = sigmoid(color_raw)`
-
-For pixel position `p = (u, v)`, Gaussian `i` has weight:
-
-```text
-w_i(p) = exp( - ||p - mu_i||^2 / (2 * sigma_i^2) )
-```
-
-The renderer uses normalized weighted average blending:
-
-```text
-I(p) = (sum_i w_i(p) * c_i + eps * bg_color) / (sum_i w_i(p) + eps)
-```
-
-The training loss is plain RGB MSE.
-
-## How To Run
-
-Install dependencies:
+## 快速开始
 
 ```bash
 pip install -r requirements.txt
+python main.py                # 运行基线（mse + torch_adam + random init）
 ```
 
-Run the default baseline:
+输出保存在 `outputs/` 下，重点查看：
+- `metrics.txt`：最终 PSNR / MSE / MAE
+- `comparison.png`：目标 / 预测 / 误差对比
+- `loss_curve.png`：训练损失曲线
 
-```bash
-python main.py
+## 目录结构
+
+```
+minimal_2dgs/
+├── main.py                     # 入口，支持 --mode student/teacher
+├── config.py                   # 所有可配置参数
+├── train.py                    # 训练循环
+├── losses.py                   # [学生文件] Loss 函数
+├── schedulers.py               # [学生文件] 学习率调度器
+├── mode.py                     # student/teacher 模式切换
+├── evaluation.py               # 评估指标计算
+├── utils.py                    # 工具函数
+├── models/
+│   └── gaussian_model.py       # 2D 高斯参数模型，含参数分组接口
+├── renderer/
+│   └── gaussian_renderer.py    # 可微渲染器
+├── optimizers/
+│   ├── factory.py              # 优化器工厂
+│   ├── torch_baselines.py      # PyTorch Adam（基线）
+│   ├── student_sgd.py          # [学生文件] SGD
+│   ├── student_momentum.py     # [学生文件] SGD + Momentum
+│   ├── student_adam.py         # [学生文件] Adam
+│   ├── student_adamw.py        # [学生文件] AdamW
+│   ├── student_muon.py         # [学生文件] Muon（bonus）
+│   └── student_newton.py       # [学生文件] Newton（bonus）
+├── initializers/
+│   ├── factory.py              # 初始化工厂
+│   ├── random_init.py          # 随机初始化（基线）
+│   ├── grid_init.py            # 网格初始化
+│   ├── image_sample_init.py    # [学生文件] 图像采样初始化
+│   └── bright_spot_init.py     # [学生文件] 亮度感知初始化
+├── target_generators/          # 目标图像生成器
+├── experiments/
+│   ├── experiment1_spec.md     # 实验说明书
+│   ├── run_competition.py      # 竞赛评测脚本
+│   └── my_competition_config.py # 竞赛提交模板
+└── data/
+    ├── Starry_Night_256.png    # 默认目标图像
+    ├── examples/               # txt 格式高斯目标示例
+    └── competition/            # 竞赛测试图像
 ```
 
-Generate only the target image:
+## 基线配置
 
-```bash
-python generate_target.py
+| 模块     | 基线选项                       |
+| -------- | ------------------------------ |
+| Loss     | `mse`                          |
+| Optimizer| `torch_adam`（lr=0.05）         |
+| Scheduler| `constant`（不调度）            |
+| Init     | `random`                       |
+| Model    | 100 个高斯，各向异性 + 透明度   |
+| 参数分组  | 所有参数统一学习率              |
+
+## 核心概念
+
+### 高斯模型
+
+每个 2D 高斯具有以下可学习参数：
+- **中心** `(x, y)`：位置（sigmoid 约束到 [0,1]）
+- **尺度** `(sigma_x, sigma_y)`：大小（softplus 约束为正）
+- **旋转角** `theta`：方向（tanh 约束）
+- **透明度** `alpha`：不透明度（sigmoid 约束到 [0,1]）
+- **颜色** `(r, g, b)`：RGB 值（sigmoid 约束到 [0,1]）
+
+### 渲染公式
+
+各向异性高斯权重：
+
+```
+w_i(p) = alpha_i * exp(-0.5 * mahalanobis_i(p))
 ```
 
-Run a quick smoke test:
+归一化加权混合：
 
-```bash
-python smoke_test.py
+```
+I(p) = (sum_i w_i(p) * c_i + eps * bg_color) / (sum_i w_i(p) + eps)
 ```
 
-Outputs are saved under `outputs/`.
+### 参数分组学习率
 
-Students should pay attention to:
+不同参数（位置、尺度、颜色等）的梯度量级差异很大，统一学习率往往不是最优的。框架支持为每种参数设置独立的学习率倍率：
 
-- `metrics.txt`: compact summary of final numbers
-- `comparison.png`: direct target / prediction / error comparison
-- `loss_curve.png`: whether training is stable
+```python
+config.optimizer.param_groups.center_lr_scale = 2.0   # 位置学更快
+config.optimizer.param_groups.color_lr_scale = 0.5     # 颜色学更慢
+```
 
-## Module Responsibilities
+有效学习率 = `base_lr * lr_scale`。
 
-- `config.py`
-  Stores all configurable settings in grouped dataclasses.
-- `main.py`
-  Small entry point that launches training.
-- `train.py`
-  Contains the training loop and wires the system together.
-- `losses.py`
-  Contains several reconstruction losses and a loss factory.
-- `utils.py`
-  Contains helper functions for seeds, device selection, image loading/cropping, image saving, plotting, and target generation.
-- `evaluation.py`
-  Computes simple metrics and saves evaluation artifacts.
-- `models/gaussian_model.py`
-  Stores Gaussian parameters and converts raw parameters to valid render-time values.
-- `renderer/gaussian_renderer.py`
-  Turns current Gaussian parameters into an RGB image.
-- `target_generators/`
-  Contains pluggable target image generators, including a txt-driven Gaussian target generator.
-- `optimizers/`
-  Contains the optimizer factory, the default PyTorch baseline, and a template for student implementations.
-- `initializers/`
-  Contains initialization strategies and a template for student implementations.
+### 学习率调度器
 
-## Default Training Flow
+训练过程中动态调整学习率，可以显著影响收敛行为：
 
-The main pipeline is:
+```python
+config.scheduler.name = "cosine"          # 余弦退火
+config.scheduler.name = "warmup_cosine"   # 预热 + 余弦退火
+config.scheduler.name = "step_decay"      # 阶梯衰减
+config.scheduler.name = "constant"        # 不调度（基线）
+```
 
-1. Build a `Config`
-2. Build a target generator and create the target image
-3. Build a `Gaussian2DModel`
-4. Build an initializer and initialize the model
-5. Build a renderer
-6. Build an optimizer
-7. Run the training loop
-8. Save images and the loss curve
-9. Save evaluation metrics and a comparison figure
+调度器返回一个乘数 `scale ∈ [min_lr_scale, 1.0]`，每步作用于所有参数组。
 
-## What Students Will Implement Later
+## 你需要实现的内容
 
-This starter code is structured so future homework can focus on a few clear extension points.
+标有 `[学生文件]` 的文件包含 `raise NotImplementedError` 的 stub，你需要补全实现。
 
-Students can later:
+### 必做
 
-- write their own target image generator in `target_generators/`
-- write their own optimizer in `optimizers/`
-- write their own initialization strategy in `initializers/`
-- compare different settings by editing `Config`
-- add evaluation and ablation code on top of the current baseline
+| 文件 | 任务 |
+|---|---|
+| `optimizers/student_sgd.py` | 实现 SGD |
+| `optimizers/student_momentum.py` | 实现 SGD + Momentum |
+| `optimizers/student_adam.py` | 实现 Adam |
+| `losses.py` | 实现至少 2 种新 loss（如 L1、MSE+L1） |
+| `initializers/image_sample_init.py` 或 `bright_spot_init.py` | 实现至少 1 种图像感知初始化 |
+| `schedulers.py` | 实现至少 1 种学习率调度器（如 cosine） |
 
-The current evaluation already gives a simple scoreboard:
+### 选做（bonus）
 
-- lower `MSE` is better
-- lower `MAE` is better
-- higher `PSNR` is better
+| 文件 | 任务 |
+|---|---|
+| `optimizers/student_adamw.py` | 实现 AdamW（解耦权重衰减） |
+| `optimizers/student_muon.py` | 实现 Muon（正交化优化器） |
+| `optimizers/student_newton.py` | 实现 Newton 风格优化器 |
 
-This is meant to make method comparison obvious during homework runs.
+## 优化器进阶路线
 
-## Config Layout
+```
+SGD  →  SGD + Momentum  →  Adam  →  AdamW
+ |         ↑                  ↑
+ |    加入动量项           加入自适应学习率
+ |    加速收敛             + 偏差校正
+```
 
-All configurable parameters now live in `config.py`, grouped by purpose:
+- **SGD**：`param -= lr * grad`
+- **Momentum**：`v = mu * v + grad; param -= lr * v`
+- **Adam**：自适应一阶/二阶矩估计 + 偏差校正
+- **AdamW**：解耦权重衰减
 
-- `config.system`
-  Seed, device, and output directory
-- `config.target`
-  Target generator choice, image size, and target file paths
-- `config.model`
-  Number of Gaussians and renderer feature switches
-- `config.render`
-  Background color and numerical epsilon
-- `config.train`
-  Training step count and logging / saving frequency
-- `config.loss`
-  Loss choice and loss-specific weights
-- `config.optimizer`
-  Optimizer choice and per-optimizer hyperparameters
-- `config.initializer`
-  Initializer choice and per-initializer hyperparameters
-- `config.evaluation`
-  Output filenames for evaluation artifacts
-- `config.visualization`
-  Optional animation export settings
-
-Example:
+## 如何切换配置
 
 ```python
 from config import Config
 
 config = Config()
+
+# 切换优化器
 config.optimizer.name = "student_adam"
 config.optimizer.student_adam.lr = 1e-2
-config.initializer.name = "bright_spot"
+
+# 开启余弦调度
+config.scheduler.name = "cosine"
+config.scheduler.min_lr_scale = 0.01
+
+# 参数分组
+config.optimizer.param_groups.center_lr_scale = 2.0
+
+# 切换初始化
+config.initializer.name = "image_sample"
+
+# 切换模型
 config.model.use_anisotropic = True
+config.model.use_alpha = True
 ```
 
-This layout is meant to make it obvious to students which settings they should edit for a given experiment.
+## 运行模式
 
-## Optional Video Export
+```bash
+# 学生模式（默认）— 只有基线模块可用，其余需要自己实现
+python main.py --mode student
 
-The default run does not export an optimization video.
-
-If you want an animation of the fitting process, enable it in `config.py`:
-
-```python
-config.visualization.save_video = True
-config.visualization.video_every = 10
-config.visualization.video_filename = "optimization.gif"
+# 教师模式 — 加载参考实现，所有模块可用
+python main.py --mode teacher
 ```
 
-This will save:
+## 竞赛自测
 
-- frame images under `outputs/video_frames/`
-- an animation such as `outputs/optimization.gif`
-
-If you set `video_filename = "optimization.mp4"` and `imageio` is available, the code will try to write an mp4. Otherwise it falls back to a gif.
-
-## Training Loss Options
-
-The project now supports multiple training losses through `config.loss.name`:
-
-- `mse`
-  Strong default baseline for image fitting.
-- `l1`
-  More robust to outliers, but sometimes less smooth.
-- `charbonnier`
-  Smooth approximation to L1, often a good compromise.
-- `mse_l1`
-  Combines stable MSE fitting with sharper L1 behavior.
-- `mse_edge`
-  Adds an edge-matching term using Sobel gradients, which can help preserve boundaries.
-
-Examples:
-
-```python
-config.loss.name = "mse"
+```bash
+python experiments/run_competition.py --config experiments/my_competition_config.py
 ```
 
-```python
-config.loss.name = "mse_l1"
-```
+在 10 张测试图（5 张真实 RGB + 5 张合成高斯）上评测，输出每张图 PSNR 和平均 PSNR。
 
-```python
-config.loss.name = "mse_edge"
-config.loss.edge_weight = 0.1
-```
+详细实验要求见 [`experiments/experiment1_spec.md`](experiments/experiment1_spec.md)。
 
-These losses are designed to be simple enough for students to read and modify.
+## 评估指标
 
-## Initializer Interface
+- **PSNR**（越高越好）：峰值信噪比，主要评分指标
+- **MSE**（越低越好）：均方误差
+- **MAE**（越低越好）：平均绝对误差
 
-All initializers now follow the same interface:
+## 配置参考
 
-```python
-initializer.initialize(model, target_image=target)
-```
+所有参数在 `config.py` 中定义，按功能分组：
 
-The important convention is:
-
-- `model` is always required
-- `target_image` is optional
-
-This means a student initializer may:
-
-- ignore `target_image` completely
-- use `target_image` to build a smarter image-aware initialization
-
-That makes it easy to compare target-independent and target-dependent methods under one interface.
-
-Current initializer choices:
-
-- `random`
-  Does not use the target image.
-- `grid`
-  Does not use the target image.
-- `image_sample`
-  Samples colors from the target image at random center locations.
-- `bright_spot`
-  Places centers on bright regions of the target image and samples their colors.
-
-This is useful because some image fitting tasks benefit a lot from better starting centers and colors.
-
-## Gaussian Txt Target Generator
-
-The project now includes a target image generator that reads Gaussian parameters
-from a txt file and renders them into an RGB target image.
-
-Set this in `Config`:
-
-```python
-config.target.name = "txt_gaussians"
-config.target.gaussian_txt_path = "data/sample_two_gaussians.txt"
-config.target.image_size = 256
-```
-
-Supported txt formats:
-
-```text
-# x  y  sigma  r  g  b
-0.30 0.32 0.11 0.95 0.25 0.20
-0.72 0.68 0.14 0.18 0.35 0.95
-```
-
-You can also use richer formats:
-
-```text
-# isotropic + alpha
-x  y  sigma  alpha  r  g  b
-
-# anisotropic
-x  y  sigma_x  sigma_y  theta  r  g  b
-
-# anisotropic + alpha
-x  y  sigma_x  sigma_y  theta  alpha  r  g  b
-```
-
-Each valid line defines one Gaussian. If the txt file has 2 lines, the target
-generator renders exactly those 2 Gaussians into the target image.
-
-This is useful for:
-
-- debugging student optimizers
-- debugging initialization logic
-- building controlled target images for experiments
-
-Students can add their own target generators by creating a new file under
-`target_generators/` and registering it in `target_generators/factory.py`.
-
-Five built-in txt examples are provided under `data/examples/`:
-
-- `01_single_gray_isotropic_star.txt`
-- `02_single_gray_anisotropic_star.txt`
-- `03_ten_gray_stars.txt`
-- `04_ten_translucent_stars.txt`
-- `05_ten_colorful_stars.txt`
-
-## How To Add A New Optimizer
-
-1. Create a new file under `optimizers/` or extend an existing one.
-2. Implement the optimizer logic.
-3. Register it in `optimizers/factory.py`.
-4. Set `config.optimizer.name` in `Config`.
-
-For example, future student names are already reserved:
-
-- `student_sgd`
-- `student_momentum`
-- `student_adam`
-
-This starter code already includes two student-editable optimizer files:
-
-- `optimizers/student_sgd.py`
-- `optimizers/student_adam.py`
-- `optimizers/student_adamw.py`
-- `optimizers/student_muon.py`
-- `optimizers/student_newton.py`
-
-Students can switch optimizers just by editing `Config`:
-
-```python
-config.optimizer.name = "student_sgd"
-```
-
-or
-
-```python
-config.optimizer.name = "student_adam"
-```
-
-or
-
-```python
-config.optimizer.name = "student_adamw"
-```
-
-or
-
-```python
-config.optimizer.name = "student_muon"
-```
-
-or
-
-```python
-config.optimizer.name = "student_newton"
-```
-
-The goal is that a student can modify only that one optimizer file and then run
-the training loop again to compare metrics.
-
-See `optimizers/custom_optimizer_template.py` for the minimal interface.
-
-## How To Add A New Initializer
-
-1. Create a new file under `initializers/`.
-2. Implement an object with an `initialize(model, target_image=None)` method.
-3. Register it in `initializers/factory.py`.
-4. Set `config.initializer.name` in `Config`.
-
-Current built-in strategies are:
-
-- `random`
-- `grid`
-- `image_sample`
-- `bright_spot`
-
-See `initializers/custom_initializer_template.py` for the starter template.
-
-## Migration Notes From The Earlier Minimal Version
-
-To keep the starter code aligned with the course specification, a few pieces were simplified during refactoring:
-
-- the old `model.py` logic moved to `models/gaussian_model.py`
-- the old `renderer.py` logic moved to `renderer/gaussian_renderer.py`
-- the old training code in `main.py` moved to `train.py`
-- target image generation is now a pluggable module under `target_generators/`
-- initialization is no longer embedded in the model
-- the default baseline remains isotropic Gaussians with normalized weighted blending
-- the default target is now the `256x256` cropped Van Gogh image again
-
-This makes the code easier to extend for assignments without turning it into a large framework.
+| 配置组 | 说明 |
+|---|---|
+| `config.system` | 种子、设备、输出目录 |
+| `config.target` | 目标图像生成器、图像大小 |
+| `config.model` | 高斯数量、各向异性/透明度开关 |
+| `config.render` | 背景色、数值 epsilon |
+| `config.train` | 训练步数、日志/保存频率 |
+| `config.loss` | Loss 选择及超参数 |
+| `config.optimizer` | 优化器选择、超参数、参数分组 |
+| `config.scheduler` | 学习率调度器选择及超参数 |
+| `config.initializer` | 初始化策略选择及超参数 |
+| `config.visualization` | 视频导出设置 |

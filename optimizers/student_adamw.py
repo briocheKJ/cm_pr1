@@ -19,32 +19,38 @@ class StudentAdamW:
         m_hat = m / (1 - beta1^t)
         v_hat = v / (1 - beta2^t)
         param = param - lr * m_hat / (sqrt(v_hat) + eps)
+
+    Note: each parameter group has its own learning rate (group["lr"]).
     """
 
     def __init__(
         self,
-        params,
-        lr: float,
+        param_groups: list[dict],
         beta1: float = 0.9,
         beta2: float = 0.999,
         eps: float = 1e-8,
         weight_decay: float = 1e-2,
     ) -> None:
-        self.params = list(params)
-        self.lr = lr
+        self.param_groups = param_groups
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = eps
         self.weight_decay = weight_decay
         self.step_count = 0
 
-        self.m = [torch.zeros_like(param) for param in self.params]
-        self.v = [torch.zeros_like(param) for param in self.params]
+        self.state: dict[int, dict[str, torch.Tensor]] = {}
+        for group in self.param_groups:
+            for param in group["params"]:
+                self.state[id(param)] = {
+                    "m": torch.zeros_like(param),
+                    "v": torch.zeros_like(param),
+                }
 
     def zero_grad(self) -> None:
-        for param in self.params:
-            if param.grad is not None:
-                param.grad.zero_()
+        for group in self.param_groups:
+            for param in group["params"]:
+                if param.grad is not None:
+                    param.grad.zero_()
 
     def step(self) -> None:
         """
