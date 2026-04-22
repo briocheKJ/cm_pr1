@@ -7,9 +7,7 @@
 
 设目标图像为：
 
-$$
-I^\star : \Omega \to [0,1]^3
-$$
+$$ I^\star : \Omega \to [0,1]^3 $$
 
 其中：
 
@@ -18,9 +16,7 @@ $$
 
 我们用 $N$ 个二维高斯来表示一张图像。第 $i$ 个高斯的参数记为：
 
-$$
-\theta_i = (\mu_i, \Sigma_i, c_i, \alpha_i)
-$$
+$$ \theta_i = (\mu_i, \Sigma_i, c_i, \alpha_i) $$
 
 其中：
 
@@ -31,9 +27,7 @@ $$
 
 将所有高斯参数拼成总参数向量：
 
-$$
-\Theta = (\theta_1, \theta_2, \dots, \theta_N)
-$$
+$$ \Theta = (\theta_1, \theta_2, \dots, \theta_N) $$
 
 说明：
 
@@ -46,24 +40,11 @@ $$
 
 对任意像素位置 $p \in \Omega$，第 $i$ 个高斯对该像素的权重定义为：
 
-$$
-w_i(p;\Theta)
-=
-\alpha_i
-\exp\left(
--\frac{1}{2}(p-\mu_i)^\top \Sigma_i^{-1}(p-\mu_i)
-\right)
-$$
+$$ w_i(p;\Theta) = \alpha_i \exp\left( -\frac{1}{2}(p-\mu_i)^\top \Sigma_i^{-1}(p-\mu_i) \right) $$
 
 于是渲染图像 $I_\Theta$ 定义为：
 
-$$
-I_\Theta(p)
-=
-\frac{\sum_{i=1}^N w_i(p;\Theta)\,c_i}
-{\sum_{i=1}^N w_i(p;\Theta)+\varepsilon},
-\qquad p \in \Omega
-$$
+$$ I_\Theta(p) = \frac{\sum_{i=1}^N w_i(p;\Theta)\,c_i}{\sum_{i=1}^N w_i(p;\Theta)+\varepsilon}, \qquad p \in \Omega $$
 
 其中 $\varepsilon > 0$ 是一个很小的常数，用于避免分母为零。  
 在本实验中，背景色默认设为黑色。
@@ -74,21 +55,13 @@ $$
 
 最基础的目标是让渲染图像尽可能接近目标图像，因此定义经验损失函数：
 
-$$
-\mathcal{L}(\Theta)
-=
-\frac{1}{|\Omega|}
-\sum_{p \in \Omega}
-\|I_\Theta(p) - I^\star(p)\|_2^2
-$$
+$$ \mathcal{L}(\Theta) = \frac{1}{|\Omega|} \sum_{p \in \Omega} \|I_\Theta(p) - I^\star(p)\|_2^2 $$
 
 这就是基线代码中使用的 **MSE loss**。
 
 如果使用其他损失函数，例如 $L_1$ 或混合损失，也可以统一写成：
 
-$$
-\min_{\Theta} \mathcal{L}(\Theta)
-$$
+$$ \min_{\Theta} \mathcal{L}(\Theta) $$
 
 ---
 
@@ -96,11 +69,7 @@ $$
 
 因此，本实验可以形式化为如下优化问题：
 
-$$
-\boxed{
-\min_{\Theta} \mathcal{L}(\Theta)
-}
-$$
+$$ \boxed{\min_{\Theta} \mathcal{L}(\Theta)} $$
 
 其中 $\Theta$ 是所有高斯的位置、形状、颜色和透明度参数组成的高维变量。
 
@@ -124,11 +93,7 @@ $$
 
 #### Gradient Descent / SGD
 
-$$
-\Theta^{(k+1)}
-=
-\Theta^{(k)} - \eta_k \nabla \mathcal{L}(\Theta^{(k)})
-$$
+$$ \Theta^{(k+1)} = \Theta^{(k)} - \eta_k \nabla \mathcal{L}(\Theta^{(k)}) $$
 
 即沿负梯度方向更新。
 
@@ -155,11 +120,7 @@ $$
 
 实验中常用 **PSNR** 评价重建质量。对于像素值范围在 $[0,1]$ 的图像，
 
-$$
-\mathrm{PSNR}
-=
-10 \log_{10}\frac{1}{\mathrm{MSE}}
-$$
+$$ \mathrm{PSNR} = 10 \log_{10}\frac{1}{\mathrm{MSE}} $$
 
 因此，当损失函数采用 MSE 时，**最小化 MSE 等价于最大化 PSNR**。  
 这也是为什么竞赛部分采用平均 PSNR 作为最终排名指标。
