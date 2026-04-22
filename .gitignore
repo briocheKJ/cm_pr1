@@ -1,0 +1,24 @@
+# Teacher-only reference solutions
+_teacher_solutions/
+experiments/_teacher_only_run_ablation.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Outputs (generated at runtime)
+outputs*/
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data artifacts (keep source data, ignore generated previews)
+data/examples_png/

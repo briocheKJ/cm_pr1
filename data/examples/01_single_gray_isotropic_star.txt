@@ -1,0 +1,5 @@
+# Example 1: one single isotropic gray Gaussian "star"
+# Format:
+# x  y  sigma  r  g  b
+
+0.50 0.50 0.022 0.82 0.82 0.82
