@@ -19,10 +19,8 @@ class ImageTargetGenerator:
     def generate(self, project_root: Path, device: torch.device) -> torch.Tensor:
         target_path = project_root / self.config.target.image_path
         if not target_path.exists():
-            source_path = project_root / "outputs" / "Starry_Night.jpg"
-            save_center_cropped_image(
-                src_path=source_path,
-                dst_path=target_path,
-                image_size=self.config.target.image_size,
+            raise FileNotFoundError(
+                f"Target image not found: {target_path}\n"
+                f"Please set config.target.image_path to a valid image path."
             )
         return load_rgb_image(target_path, image_size=self.config.target.image_size, device=device)

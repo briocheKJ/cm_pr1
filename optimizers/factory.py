@@ -23,7 +23,8 @@ def _get_base_lr(config: OptimizerConfig) -> float:
         return config.student_muon.lr
     if name == "student_newton":
         return config.student_newton.lr
-    raise ValueError(f"Unknown optimizer name: {name}")
+    # Custom optimizer: use torch_adam lr as default base_lr
+    return config.torch_adam.lr
 
 
 def build_optimizer(model: Gaussian2DModel, config: OptimizerConfig):
@@ -112,4 +113,24 @@ def build_optimizer(model: Gaussian2DModel, config: OptimizerConfig):
             max_curvature=config.student_newton.max_curvature,
         )
 
-    raise ValueError(f"Unknown optimizer name: {name}")
+    # --- Custom optimizer: try to import from student's custom module ---
+    try:
+        import importlib
+        mod = importlib.import_module(f"optimizers.{name}")
+        # Look for a class with zero_grad and step methods
+        cls = None
+        for attr_name in dir(mod):
+            obj = getattr(mod, attr_name)
+            if isinstance(obj, type) and hasattr(obj, "step") and hasattr(obj, "zero_grad"):
+                cls = obj
+                break
+        if cls is not None:
+            return cls(param_groups=param_groups)
+    except ModuleNotFoundError:
+        pass
+
+    raise ValueError(
+        f"Unknown optimizer name: {name}\n"
+        f"If you defined a custom optimizer, create a file `optimizers/{name}.py`\n"
+        f"with a class that accepts `param_groups` and has `zero_grad()` and `step()` methods."
+    )

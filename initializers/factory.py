@@ -38,4 +38,24 @@ def build_initializer(config: Config):
             from initializers.bright_spot_init import BrightSpotGaussianInitializer
         return BrightSpotGaussianInitializer(config)
 
-    raise ValueError(f"Unknown initializer name: {name}")
+    # --- Custom initializer: try to import from student's custom module ---
+    try:
+        import importlib
+        mod = importlib.import_module(f"initializers.{name}_init")
+        # Look for a class ending with "Initializer"
+        cls = None
+        for attr_name in dir(mod):
+            obj = getattr(mod, attr_name)
+            if isinstance(obj, type) and attr_name.endswith("Initializer") and attr_name != "Initializer":
+                cls = obj
+                break
+        if cls is not None:
+            return cls(config)
+    except ModuleNotFoundError:
+        pass
+
+    raise ValueError(
+        f"Unknown initializer name: {name}\n"
+        f"If you defined a custom initializer, create a file `initializers/{name}_init.py`\n"
+        f"with a class ending in `Initializer` that has an `initialize(model, target_image)` method."
+    )

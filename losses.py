@@ -113,4 +113,18 @@ def build_loss(config: LossConfig):
             prediction, target, edge_weight=config.edge_weight,
         )
 
-    raise ValueError(f"Unknown loss name: {name}")
+    # --- Custom loss: try to import from student's custom module ---
+    try:
+        import importlib
+        mod = importlib.import_module(f"losses_{name}")
+        loss_fn = getattr(mod, f"{name}_loss", None) or getattr(mod, "loss", None)
+        if loss_fn is not None:
+            return loss_fn
+    except ModuleNotFoundError:
+        pass
+
+    raise ValueError(
+        f"Unknown loss name: {name}\n"
+        f"If you defined a custom loss, create a file `losses_{name}.py` in the project root\n"
+        f"with a function named `{name}_loss(prediction, target)` or `loss(prediction, target)`."
+    )
