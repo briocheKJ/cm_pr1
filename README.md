@@ -15,6 +15,10 @@
 
 光栅王国的古代档案馆中，保存着许多珍贵画卷。但其中一幅名为《晨曦之印》的图像已经严重受损，只剩下一张目标观测图。修复师们无法直接逐像素描摹它，只能召唤有限数量的星光微粒，让这些微粒自动移动、调整大小与颜色，最终重新拼出原图。
 
+<p align="center">
+  <img src="data/Starry_Night_256.png" width="256" alt="梵高《星空》">
+</p>
+
 现在，你将扮演一名 **星光修复师**。
 
 你手中拥有 `N` 颗可操控的星光微粒，也就是一组可学习的高斯：
@@ -53,7 +57,21 @@
 
 本实验基于 2D Gaussian Splatting 图像拟合任务。给定一张目标图像，系统会用一组 2D 高斯函数的加权混合去逼近它，并通过梯度优化不断改善拟合质量。
 
+下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
 
+<p align="center">
+  <img src="docs/comparison_baseline.png" width="720" alt="基线结果：目标 / 重建 / 误差">
+  <br>
+  <em>左：目标图像 | 中：高斯重建 | 右：绝对误差</em>
+</p>
+
+优化过程中，高斯微粒逐步移动、缩放、变色，逼近目标图像：
+
+<p align="center">
+  <img src="docs/optimization_progress.png" width="720" alt="优化过程">
+  <br>
+  <em>从左到右：第 50 / 100 / 150 / 200 步的重建结果</em>
+</p>
 
 你拿到的 starter code 已经可以运行：
 
@@ -134,6 +152,14 @@ config.model.use_alpha = True
 ```
 
 你需要自己编写实验脚本，批量运行不同配置、收集结果并生成图表。这本身也是实验能力的一部分。
+
+以下是基线配置的 loss 曲线示例：
+
+<p align="center">
+  <img src="docs/loss_curve_baseline.png" width="480" alt="基线 loss 曲线">
+  <br>
+  <em>基线 loss 曲线（MSE loss，Adam，200 步）</em>
+</p>
 
 ---
 
@@ -393,6 +419,12 @@ scale = min_scale + 0.5 * (1 - min_scale) * (1 + cos(pi * step / total))
 
 ### 7.1 真实 RGB 图像（256×256）
 
+<p align="center">
+  <img src="docs/competition_real_images.png" width="640" alt="竞赛真实图像预览">
+  <br>
+  <em>从左到右：R1 星空 | R2 黑天鹅 | R3 火烈鸟 | R4 汽车 | R5 跑酷</em>
+</p>
+
 | 编号 | 文件 | 描述 |
 | ---- | ---- | ---- |
 | R1 | `data/Starry_Night_256.png` | 梵高《星空》，复杂纹理和颜色渐变 |
@@ -402,6 +434,12 @@ scale = min_scale + 0.5 * (1 - min_scale) * (1 + cos(pi * step / total))
 | R5 | `data/competition/parkour_256.png` | 跑酷人物，建筑背景，混合场景 |
 
 ### 7.2 txt 合成高斯目标
+
+<p align="center">
+  <img src="docs/competition_synthetic_images.png" width="640" alt="竞赛合成图像预览">
+  <br>
+  <em>从左到右：S1 稀疏彩色 | S2 密集半透明 | S3 各向异性 | S4 半透明灰色 | S5 彩色</em>
+</p>
 
 | 编号 | 文件 | 描述 |
 | ---- | ---- | ---- |
