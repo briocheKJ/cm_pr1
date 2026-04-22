@@ -98,8 +98,8 @@ python experiments/run_competition.py --config experiments/my_competition_config
 
 模板文件见：
 
-- [experiments/my_competition_config.py](/home/lkj/code/cm_pr1/minimal_2dgs/experiments/my_competition_config.py:1)
+- [experiments/my_competition_config.py](../experiments/my_competition_config.py)
 
 竞赛评测脚本见：
 
-- [experiments/run_competition.py](/home/lkj/code/cm_pr1/minimal_2dgs/experiments/run_competition.py:1)
+- [experiments/run_competition.py](../experiments/run_competition.py)

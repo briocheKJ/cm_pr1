@@ -2,7 +2,7 @@
 
 在遥远的「光栅王国」里，所有图像都不是由像素直接绘制出来的，而是由许多漂浮在空中的星光微粒组成。每个微粒对应一个可学习的 2D Gaussian，拥有位置、尺度、颜色，以及可选的透明度。修复师们无法直接逐像素描摹它，只能召唤有限数量的星光微粒，让这些微粒自动移动、调整大小与颜色，最终重新拼出原图。你的目标，就是不断调整这些微粒的参数，使生成图像尽可能接近目标图像。
 
-优化问题的详细介绍见[docs/problem_formulation.md](/home/lkj/code/cm_pr1/minimal_2dgs/docs/problem_formulation.md:1)
+优化问题的详细介绍见 [docs/problem_formulation.md](docs/problem_formulation.md)
 
 这份仓库是课程实验的 starter code。它提供了可运行基线，也预留了 loss、初始化器、优化器、调度器和目标图生成器的扩展接口，方便做消融实验和竞赛。
 
@@ -77,15 +77,15 @@ python generate_target.py
 
 | 类型 | 文件 |
 | ---- | ---- |
-| 必做 | [losses.py](/home/lkj/code/cm_pr1/minimal_2dgs/losses.py:1) |
-| 必做 | [schedulers.py](/home/lkj/code/cm_pr1/minimal_2dgs/schedulers.py:1) |
-| 必做 | [optimizers/student_sgd.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_sgd.py:1) |
-| 必做 | [optimizers/student_momentum.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_momentum.py:1) |
-| 必做 | [optimizers/student_adam.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_adam.py:1) |
-| 必做 | [initializers/image_sample_init.py](/home/lkj/code/cm_pr1/minimal_2dgs/initializers/image_sample_init.py:1) 或 [initializers/bright_spot_init.py](/home/lkj/code/cm_pr1/minimal_2dgs/initializers/bright_spot_init.py:1) |
-| 选做 | [optimizers/student_adamw.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_adamw.py:1) |
-| 选做 | [optimizers/student_muon.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_muon.py:1) |
-| 选做 | [optimizers/student_newton.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_newton.py:1) |
+| 必做 | [losses.py](losses.py) |
+| 必做 | [schedulers.py](schedulers.py) |
+| 必做 | [optimizers/student_sgd.py](optimizers/student_sgd.py) |
+| 必做 | [optimizers/student_momentum.py](optimizers/student_momentum.py) |
+| 必做 | [optimizers/student_adam.py](optimizers/student_adam.py) |
+| 必做 | [initializers/image_sample_init.py](initializers/image_sample_init.py) 或 [initializers/bright_spot_init.py](initializers/bright_spot_init.py) |
+| 选做 | [optimizers/student_adamw.py](optimizers/student_adamw.py) |
+| 选做 | [optimizers/student_muon.py](optimizers/student_muon.py) |
+| 选做 | [optimizers/student_newton.py](optimizers/student_newton.py) |
 
 建议先完成所有必做项，再开始竞赛调参。
 
@@ -100,7 +100,7 @@ python generate_target.py
 
 ## 你主要会改哪里
 
-所有主要配置都在 [config.py](/home/lkj/code/cm_pr1/minimal_2dgs/config.py:1)。
+所有主要配置都在 [config.py](config.py)。
 
 最常改的配置项：
 
@@ -116,22 +116,22 @@ python generate_target.py
 
 | 模块 | 需要改的文件 | 说明 |
 | ---- | ---- | ---- |
-| Loss | [losses.py](/home/lkj/code/cm_pr1/minimal_2dgs/losses.py:1) | 实现 `l1`、`charbonnier`、`mse_l1`、`mse_edge` 等 loss |
-| Scheduler | [schedulers.py](/home/lkj/code/cm_pr1/minimal_2dgs/schedulers.py:1) | 实现 `cosine`、`warmup_cosine`、`step_decay` |
-| Optimizer | [optimizers/student_sgd.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_sgd.py:1) | 实现 SGD |
-| Optimizer | [optimizers/student_momentum.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_momentum.py:1) | 实现 SGD + Momentum |
-| Optimizer | [optimizers/student_adam.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_adam.py:1) | 实现 Adam |
-| Optimizer Bonus | [optimizers/student_adamw.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_adamw.py:1) | 选做：实现 AdamW |
-| Optimizer Bonus | [optimizers/student_muon.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_muon.py:1) | 选做：实现 Muon |
-| Optimizer Bonus | [optimizers/student_newton.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/student_newton.py:1) | 选做：实现 Newton 风格方法 |
-| Initializer | [initializers/image_sample_init.py](/home/lkj/code/cm_pr1/minimal_2dgs/initializers/image_sample_init.py:1) | 图像采样初始化 |
-| Initializer | [initializers/bright_spot_init.py](/home/lkj/code/cm_pr1/minimal_2dgs/initializers/bright_spot_init.py:1) | 亮度感知初始化 |
+| Loss | [losses.py](losses.py) | 实现 `l1`、`charbonnier`、`mse_l1`、`mse_edge` 等 loss |
+| Scheduler | [schedulers.py](schedulers.py) | 实现 `cosine`、`warmup_cosine`、`step_decay` |
+| Optimizer | [optimizers/student_sgd.py](optimizers/student_sgd.py) | 实现 SGD |
+| Optimizer | [optimizers/student_momentum.py](optimizers/student_momentum.py) | 实现 SGD + Momentum |
+| Optimizer | [optimizers/student_adam.py](optimizers/student_adam.py) | 实现 Adam |
+| Optimizer Bonus | [optimizers/student_adamw.py](optimizers/student_adamw.py) | 选做：实现 AdamW |
+| Optimizer Bonus | [optimizers/student_muon.py](optimizers/student_muon.py) | 选做：实现 Muon |
+| Optimizer Bonus | [optimizers/student_newton.py](optimizers/student_newton.py) | 选做：实现 Newton 风格方法 |
+| Initializer | [initializers/image_sample_init.py](initializers/image_sample_init.py) | 图像采样初始化 |
+| Initializer | [initializers/bright_spot_init.py](initializers/bright_spot_init.py) | 亮度感知初始化 |
 
 如果你想自己扩展新模块，也可以参考这些模板：
 
-- [optimizers/custom_optimizer_template.py](/home/lkj/code/cm_pr1/minimal_2dgs/optimizers/custom_optimizer_template.py:1)
-- [initializers/custom_initializer_template.py](/home/lkj/code/cm_pr1/minimal_2dgs/initializers/custom_initializer_template.py:1)
-- [target_generators/custom_target_generator_template.py](/home/lkj/code/cm_pr1/minimal_2dgs/target_generators/custom_target_generator_template.py:1)
+- [optimizers/custom_optimizer_template.py](optimizers/custom_optimizer_template.py)
+- [initializers/custom_initializer_template.py](initializers/custom_initializer_template.py)
+- [target_generators/custom_target_generator_template.py](target_generators/custom_target_generator_template.py)
 
 ## 训练输出
 
@@ -148,13 +148,13 @@ python generate_target.py
 
 ## 文档导航
 
-- [docs/problem_formulation.md](/home/lkj/code/cm_pr1/minimal_2dgs/docs/problem_formulation.md:1)
+- [docs/problem_formulation.md](docs/problem_formulation.md)
   优化问题形式化
-- [docs/ablation_experiments.md](/home/lkj/code/cm_pr1/minimal_2dgs/docs/ablation_experiments.md:1)
+- [docs/ablation_experiments.md](docs/ablation_experiments.md)
   消融实验要求
-- [docs/competition.md](/home/lkj/code/cm_pr1/minimal_2dgs/docs/competition.md:1)
+- [docs/competition.md](docs/competition.md)
   竞赛规则与提交方式
-- [data/README.md](/home/lkj/code/cm_pr1/minimal_2dgs/data/README.md:1)
+- [data/README.md](data/README.md)
   数据说明
 
 ## 代码结构
