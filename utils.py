@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import random
 from pathlib import Path
@@ -14,6 +15,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from PIL import Image
+
+
+class MetricTracker:
+    """
+    Minimal metric recorder for training curves.
+    """
+
+    def __init__(self) -> None:
+        self.records: list[dict[str, float]] = []
+
+    def log(self, step: int, metrics: dict[str, float]) -> None:
+        record: dict[str, float] = {"step": float(step)}
+        record.update({key: float(value) for key, value in metrics.items()})
+        self.records.append(record)
+
+    def metric_names(self) -> list[str]:
+        names: set[str] = set()
+        for record in self.records:
+            names.update(record.keys())
+        names.discard("step")
+        return sorted(names)
+
+    def get_series(self, name: str) -> list[float]:
+        return [float(record.get(name, float("nan"))) for record in self.records]
+
+    def save_json(self, path: str | Path) -> None:
+        Path(path).write_text(json.dumps(self.records, indent=2), encoding="utf-8")
+
+    def plot(self, path: str | Path, title: str = "Training Metrics") -> None:
+        metric_names = self.metric_names()
+        if not self.records or not metric_names:
+            return
+
+        steps = self.get_series("step")
+        plt.figure(figsize=(7, 4))
+        for name in metric_names:
+            plt.plot(steps, self.get_series(name), linewidth=2, label=name)
+        plt.xlabel("Training step")
+        plt.ylabel("Value")
+        plt.title(title)
+        plt.grid(True, alpha=0.3)
+        if len(metric_names) > 1:
+            plt.legend()
+        plt.tight_layout()
+        plt.savefig(Path(path), dpi=150)
+        plt.close()
 
 
 def set_seed(seed: int) -> None:

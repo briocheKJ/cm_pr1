@@ -1,34 +1,49 @@
+"""
+Generate a target image from a txt Gaussian spec file.
+
+Usage:
+    python generate_target.py                                           # default example
+    python generate_target.py data/txt/t3_sparse_colorful.txt       # specify txt file
+    python generate_target.py data/txt/t3_sparse_colorful.txt --size 128 -o my_target.png
+"""
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
-from config import Config
-from target_generators import build_target_generator
-from utils import ensure_dir, resolve_device, save_image, set_seed
+from target_generators import render_txt_gaussians
+from utils import resolve_device, save_image
 
 
-def generate_target(config: Config, output_name: str = "generated_target.png") -> None:
-    """
-    Generate a target image without running training.
-
-    This is useful when students want to debug a txt-defined Gaussian target
-    image before testing their optimizer or initializer.
-    """
-    set_seed(config.system.seed)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Render a txt Gaussian spec to an image")
+    parser.add_argument(
+        "txt_path",
+        nargs="?",
+        default="data/txt/t2_colorful_stars.txt",
+        help="Path to the txt Gaussian spec file",
+    )
+    parser.add_argument("--size", type=int, default=256, help="Output image size (default: 256)")
+    parser.add_argument("-o", "--output", type=str, default=None, help="Output image path")
+    args = parser.parse_args()
 
     project_root = Path(__file__).resolve().parent
-    output_dir = ensure_dir(project_root / config.system.output_dir)
-    device = resolve_device(config.system.device)
+    txt_path = project_root / args.txt_path
+    device = resolve_device("auto")
 
-    target_generator = build_target_generator(config)
-    target = target_generator.generate(project_root=project_root, device=device)
-    output_path = output_dir / output_name
-    save_image(target, output_path)
+    image = render_txt_gaussians(txt_path=txt_path, image_size=args.size, device=device)
 
-    print(f"Target generator: {config.target.name}")
-    print(f"Image size: {config.target.image_size}x{config.target.image_size}")
-    print(f"Saved generated target to: {output_path}")
+    if args.output:
+        output_path = Path(args.output)
+    else:
+        output_path = project_root / "outputs" / f"{txt_path.stem}.png"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    save_image(image, output_path)
+
+    print(f"Input:  {txt_path}")
+    print(f"Size:   {args.size}x{args.size}")
+    print(f"Saved:  {output_path}")
 
 
 if __name__ == "__main__":
-    generate_target(Config())
+    main()

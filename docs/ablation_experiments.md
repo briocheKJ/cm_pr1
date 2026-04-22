@@ -8,7 +8,7 @@
 
 | 项目 | 默认设置 |
 | ---- | ---- |
-| 图像 | `data/Starry_Night_256.png` |
+| 图像 | `data/real_images/Starry_Night_256.png` |
 | 图像大小 | `256 x 256` |
 | 高斯数量 | `100` |
 | 步数 | `200` |
@@ -21,18 +21,6 @@
 | 随机种子 | `42` |
 
 建议先保存这一组基线结果，再开始消融。
-
-基线重建结果：
-
-<p align="center">
-  <img src="comparison_baseline.png" width="720" alt="Baseline target prediction error">
-</p>
-
-基线 loss 曲线：
-
-<p align="center">
-  <img src="loss_curve_baseline.png" width="480" alt="Baseline loss curve">
-</p>
 
 ## 需要提交什么
 
@@ -54,11 +42,11 @@
 
 | 实验 | 模块 | 需要做什么 | 推荐比较对象 | 其余保持不变 | 重点观察 | 补充说明 |
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| A | Loss | 在 `losses.py` 中实现至少 2 种新 loss | `mse`, `l1`, `mse_l1` | 初始化、优化器、调度器、模型开关 | 最终 PSNR、曲线平滑性、收敛速度 | 无 |
-| B | 初始化策略 | 在 `initializers/` 中实现至少 1 种图像感知初始化 | `random` vs 你的方法 | loss、优化器、调度器、模型开关 | 前 50 步收敛速度、最终 PSNR | 重点看前期收敛 |
+| A | Loss | 在 `student/losses.py` 中实现至少 2 种新 loss | `mse`, `l1`, `mse_l1` | 初始化、优化器、调度器、模型开关 | 最终 PSNR、曲线平滑性、收敛速度 | 无 |
+| B | 初始化策略 | 在 `student/initializers.py` 中实现至少 1 种图像感知初始化 | `random` vs 你的方法 | loss、优化器、调度器、模型开关 | 前 50 步收敛速度、最终 PSNR | 重点看前期收敛 |
 | C | 优化器 | 实现 `student_sgd`, `student_momentum`, `student_adam` | `torch_adam`, `student_sgd`, `student_momentum`, `student_adam` | 初始化、loss、调度器、模型开关 | 收敛速度、稳定性、最终 PSNR | `student_adam` 应与 `torch_adam` 接近 |
 | D | 模型设计 | 无需实现新代码，仅切换配置 | 见下方 4 种组合 | 初始化、loss、优化器、调度器 | 各向异性和 alpha 对 PSNR 的贡献 | 比较开关是否互补 |
-| E | 学习率调度器 | 在 `schedulers.py` 中实现至少 1 种调度器 | `constant`, `cosine`, `warmup_cosine`, `step_decay` | 初始化、loss、优化器、模型开关 | 中后期收敛行为、最终 PSNR | 重点看后期是否更稳 |
+| E | 学习率调度器 | 在 `student/schedulers.py` 中实现至少 1 种调度器 | `constant`, `cosine`, `warmup_cosine`, `step_decay` | 初始化、loss、优化器、模型开关 | 中后期收敛行为、最终 PSNR | 重点看后期是否更稳 |
 
 ## 实验 D 的 4 种组合
 

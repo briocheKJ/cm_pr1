@@ -1,5 +1,0 @@
-# Example 2: one single anisotropic gray Gaussian "star"
-# Format:
-# x  y  sigma_x  sigma_y  theta  r  g  b
-
-0.50 0.50 0.050 0.010 0.75 0.82 0.82 0.82

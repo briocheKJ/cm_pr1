@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import torch
 
-from config import Config
+from config import Config, set_mode
 from evaluation import evaluate_prediction, save_comparison_visual, save_evaluation_report
-from initializers import build_initializer
-from losses import build_loss
 from models import Gaussian2DModel
-from optimizers import build_optimizer
 from renderer import GaussianRenderer
-from schedulers import build_scheduler
+from student.initializers import build_initializer
+from student.losses import build_loss
+from student.optimizers import build_optimizer
+from student.schedulers import build_scheduler
 from target_generators import build_target_generator
 from utils import (
+    MetricTracker,
     build_animation_from_frames,
     ensure_dir,
     plot_loss_curve,
@@ -44,12 +46,12 @@ def train(config: Config) -> None:
     output_dir = ensure_dir(project_root / config.system.output_dir)
     frame_paths: list[Path] = []
     frames_dir: Path | None = None
-    if config.visualization.save_video:
-        frames_dir = ensure_dir(output_dir / config.visualization.video_frames_dir)
+    if config.train.save_video:
+        frames_dir = ensure_dir(output_dir / "video_frames")
 
     target_generator = build_target_generator(config)
     target = target_generator.generate(project_root=project_root, device=device)
-    save_image(target, output_dir / config.evaluation.target_filename)
+    save_image(target, output_dir / "target.png")
 
     model = Gaussian2DModel(num_gaussians=config.model.num_gaussians).to(device)
     initializer = build_initializer(config)
@@ -65,6 +67,7 @@ def train(config: Config) -> None:
     optimizer = build_optimizer(model=model, config=config.optimizer)
     loss_fn = build_loss(config.loss)
     scheduler = build_scheduler(config.scheduler)
+    metric_tracker = MetricTracker()
 
     losses: list[float] = []
 
@@ -78,7 +81,7 @@ def train(config: Config) -> None:
     print(f"Optimizer: {config.optimizer.name}")
     print(f"Scheduler: {config.scheduler.name}")
     print(f"Loss: {config.loss.name}")
-    print(f"Save video: {config.visualization.save_video}")
+    print(f"Save video: {config.train.save_video}")
 
     for step in range(1, config.train.num_steps + 1):
         lr_scale = scheduler(step, config.train.num_steps)
@@ -94,6 +97,10 @@ def train(config: Config) -> None:
         optimizer.step()
 
         losses.append(loss.item())
+        metric_tracker.log(
+            step=step,
+            metrics=getattr(loss_fn, "last_metrics", {"total_loss": loss.item()}),
+        )
 
         if step == 1 or step % config.train.print_every == 0 or step == config.train.num_steps:
             print(f"step={step:04d}  loss={loss.item():.6f}")
@@ -101,9 +108,9 @@ def train(config: Config) -> None:
         if step % config.train.save_every == 0 or step == config.train.num_steps:
             save_image(prediction, output_dir / f"recon_step_{step:04d}.png")
 
-        if config.visualization.save_video and (
+        if config.train.save_video and (
             step == 1
-            or step % config.visualization.video_every == 0
+            or step % config.train.video_every == 0
             or step == config.train.num_steps
         ):
             assert frames_dir is not None
@@ -116,13 +123,15 @@ def train(config: Config) -> None:
             )
             frame_paths.append(frame_path)
 
-    save_image(prediction, output_dir / config.evaluation.final_reconstruction_filename)
-    plot_loss_curve(losses, output_dir / config.evaluation.loss_curve_filename)
+    save_image(prediction, output_dir / "final_reconstruction.png")
+    plot_loss_curve(losses, output_dir / "loss_curve.png")
+    metric_tracker.save_json(output_dir / "metrics.json")
+    metric_tracker.plot(output_dir / "metric_curves.png")
 
     eval_result = evaluate_prediction(prediction=prediction, target=target)
     save_evaluation_report(
         result=eval_result,
-        path=output_dir / config.evaluation.metrics_filename,
+        path=output_dir / "evaluation.txt",
         optimizer_name=config.optimizer.name,
         init_name=config.initializer.name,
         num_steps=config.train.num_steps,
@@ -131,13 +140,13 @@ def train(config: Config) -> None:
     save_comparison_visual(
         target=target,
         prediction=prediction,
-        path=output_dir / config.evaluation.comparison_filename,
+        path=output_dir / "comparison.png",
     )
 
-    if config.visualization.save_video:
+    if config.train.save_video:
         animation_path = build_animation_from_frames(
             frame_paths=frame_paths,
-            output_path=output_dir / config.visualization.video_filename,
+            output_path=output_dir / "optimization.mp4",
         )
         print(f"Saved optimization animation to: {animation_path}")
 
@@ -149,3 +158,11 @@ def train(config: Config) -> None:
     )
 
     print(f"Saved outputs to: {output_dir}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="2D Gaussian Splatting image fitting")
+    parser.add_argument("--mode", choices=["student", "teacher"], default="student")
+    args = parser.parse_args()
+    set_mode(args.mode)
+    train(Config())

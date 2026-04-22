@@ -4,7 +4,7 @@
 
 自由组合模块和超参数，在测试集上获得尽可能高的平均 PSNR。
 
-建议先完成必做模块和消融实验，再进入竞赛部分。
+建议先完成必做模块和消融实验，再进入竞赛部分。竞赛部分将根据你在实验报告中报告的PSNR进行全班排名，以确定你的最终分数。
 
 ## 两个赛道
 
@@ -41,16 +41,16 @@
 
 | 编号 | 类型 | 文件 |
 | ---- | ---- | ---- |
-| R1 | RGB | `data/Starry_Night_256.png` |
-| R2 | RGB | `data/competition/blackswan_256.png` |
-| R3 | RGB | `data/competition/flamingo_256.png` |
-| R4 | RGB | `data/competition/car-roundabout_256.png` |
-| R5 | RGB | `data/competition/parkour_256.png` |
-| S1 | txt | `data/competition/t3_sparse_colorful.txt` |
-| S2 | txt | `data/competition/t4_dense_cluster.txt` |
-| S3 | txt | `data/competition/t5_anisotropic_mix.txt` |
-| S4 | txt | `data/examples/04_ten_translucent_stars.txt` |
-| S5 | txt | `data/examples/05_ten_colorful_stars.txt` |
+| R1 | RGB | `data/real_images/Starry_Night_256.png` |
+| R2 | RGB | `data/real_images/blackswan_256.png` |
+| R3 | RGB | `data/real_images/flamingo_256.png` |
+| R4 | RGB | `data/real_images/car-roundabout_256.png` |
+| R5 | RGB | `data/real_images/parkour_256.png` |
+| S1 | txt | `data/txt/t1_translucent_stars.txt` |
+| S2 | txt | `data/txt/t2_colorful_stars.txt` |
+| S3 | txt | `data/txt/t3_sparse_colorful.txt` |
+| S4 | txt | `data/txt/t4_dense_cluster.txt` |
+| S5 | txt | `data/txt/t5_anisotropic_mix.txt` |
 
 最终成绩取 10 张图的平均 PSNR。
 
@@ -80,26 +80,3 @@
 
 总分 = Sprint + Standard，满分 40。
 
-## 如何运行
-
-```bash
-python experiments/run_competition.py --config experiments/my_competition_config.py
-```
-
-## 需要提交什么
-
-| 内容 | 说明 |
-| ---- | ---- |
-| `my_competition_config.py` | 必交 |
-| 自定义源码 | 若你新写了优化器 / 初始化器 / loss / 调度器，需要一并提交 |
-| 简短说明 | 不超过 500 字，说明你的设计思路 |
-
-## 配置模板
-
-模板文件见：
-
-- [experiments/my_competition_config.py](../experiments/my_competition_config.py)
-
-竞赛评测脚本见：
-
-- [experiments/run_competition.py](../experiments/run_competition.py)
