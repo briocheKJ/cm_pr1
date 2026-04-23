@@ -20,7 +20,8 @@ class RandomGaussianInitializer:
         center_init = 0.1 + 0.8 * torch.rand(num_gaussians, 2, device=device)
         sigma_init = 0.10 + 0.04 * torch.rand(num_gaussians, 1, device=device)
         scale_init = sigma_init.repeat(1, 2)
-        angle_init = torch.zeros(num_gaussians, 1, device=device)
+        rotation_init = torch.zeros(num_gaussians, 2, device=device)
+        rotation_init[:, 0] = 1.0
         alpha_value = 0.1 if self.config.model.use_alpha else 1.0
         alpha_init = torch.full((num_gaussians, 1), alpha_value, device=device)
         color_init = 0.5 + 0.05 * torch.randn(num_gaussians, 3, device=device)
@@ -29,7 +30,7 @@ class RandomGaussianInitializer:
         model.set_raw_parameters(
             center_raw=inverse_sigmoid(center_init),
             scale_raw=inverse_softplus(scale_init),
-            angle_raw=angle_init,
+            rotation_raw=rotation_init,
             alpha_raw=inverse_sigmoid(alpha_init),
             color_raw=inverse_sigmoid(color_init),
         )

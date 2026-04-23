@@ -22,7 +22,7 @@ def inverse_softplus(y: torch.Tensor) -> torch.Tensor:
 class GaussianRenderParams:
     centers: torch.Tensor
     scales: torch.Tensor
-    angles: torch.Tensor
+    rotations: torch.Tensor
     alphas: torch.Tensor
     colors: torch.Tensor
 
@@ -42,23 +42,25 @@ class Gaussian2DModel(nn.Module):
     def __init__(self, num_gaussians: int = 32) -> None:
         super().__init__()
         self.num_gaussians = num_gaussians
+        default_rotation = torch.zeros(num_gaussians, 2)
+        default_rotation[:, 0] = 1.0
 
         self.center_raw = nn.Parameter(torch.zeros(num_gaussians, 2))
         self.scale_raw = nn.Parameter(torch.zeros(num_gaussians, 2))
-        self.angle_raw = nn.Parameter(torch.zeros(num_gaussians, 1))
+        self.rotation_raw = nn.Parameter(default_rotation)
         self.alpha_raw = nn.Parameter(torch.zeros(num_gaussians, 1))
         self.color_raw = nn.Parameter(torch.zeros(num_gaussians, 3))
 
     def get_render_params(self) -> GaussianRenderParams:
         centers = torch.sigmoid(self.center_raw)
         scales = F.softplus(self.scale_raw) + 1e-4
-        angles = torch.pi * torch.tanh(self.angle_raw)
+        rotations = F.normalize(self.rotation_raw, dim=-1, eps=1e-8)
         alphas = torch.sigmoid(self.alpha_raw)
         colors = torch.sigmoid(self.color_raw)
         return GaussianRenderParams(
             centers=centers,
             scales=scales,
-            angles=angles,
+            rotations=rotations,
             alphas=alphas,
             colors=colors,
         )
@@ -74,7 +76,7 @@ class Gaussian2DModel(nn.Module):
         return [
             {"name": "center", "params": [self.center_raw], "lr": base_lr * group_config.center_lr_scale, "base_lr": base_lr * group_config.center_lr_scale},
             {"name": "scale",  "params": [self.scale_raw],  "lr": base_lr * group_config.scale_lr_scale,  "base_lr": base_lr * group_config.scale_lr_scale},
-            {"name": "angle",  "params": [self.angle_raw],  "lr": base_lr * group_config.angle_lr_scale,  "base_lr": base_lr * group_config.angle_lr_scale},
+            {"name": "rotation",  "params": [self.rotation_raw],  "lr": base_lr * group_config.angle_lr_scale,  "base_lr": base_lr * group_config.angle_lr_scale},
             {"name": "alpha",  "params": [self.alpha_raw],  "lr": base_lr * group_config.alpha_lr_scale,  "base_lr": base_lr * group_config.alpha_lr_scale},
             {"name": "color",  "params": [self.color_raw],  "lr": base_lr * group_config.color_lr_scale,  "base_lr": base_lr * group_config.color_lr_scale},
         ]
@@ -83,7 +85,7 @@ class Gaussian2DModel(nn.Module):
         self,
         center_raw: torch.Tensor,
         scale_raw: torch.Tensor,
-        angle_raw: torch.Tensor,
+        rotation_raw: torch.Tensor,
         alpha_raw: torch.Tensor,
         color_raw: torch.Tensor,
     ) -> None:
@@ -93,6 +95,6 @@ class Gaussian2DModel(nn.Module):
         with torch.no_grad():
             self.center_raw.copy_(center_raw)
             self.scale_raw.copy_(scale_raw)
-            self.angle_raw.copy_(angle_raw)
+            self.rotation_raw.copy_(rotation_raw)
             self.alpha_raw.copy_(alpha_raw)
             self.color_raw.copy_(color_raw)

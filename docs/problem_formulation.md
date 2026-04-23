@@ -21,7 +21,7 @@ $$ \theta_i = (\mu_i, \Sigma_i, c_i, \alpha_i) $$
 其中：
 
 - $\mu_i = (x_i, y_i) \in \mathbb{R}^2$：高斯中心；
-- $\Sigma_i \in \mathbb{R}^{2 \times 2}$：高斯形状矩阵；
+- $\Sigma_i \in \mathbb{R}^{2 \times 2}$：高斯形状矩阵，包含旋转和半径信息；
 - $c_i \in [0,1]^3$：RGB 颜色；
 - $\alpha_i \in [0,1]$：透明度。
 
@@ -33,6 +33,7 @@ $$ \Theta = (\theta_1, \theta_2, \dots, \theta_N) $$
 
 - 当 `use_anisotropic = False` 时，$\Sigma_i = \sigma_i^2 I$，即各向同性高斯；
 - 当 `use_alpha = False` 时，可视为 $\alpha_i = 1$，即不透明。
+- 在代码实现中，并不是直接优化矩阵 $\Sigma_i$，而是用可学习的 `scale` 与归一化旋转方向来参数化它；对于二维旋转，这个方向可以理解为 $(cos\phi,\sin\phi)$。
 
 ---
 

@@ -30,7 +30,7 @@ class GaussianRenderer:
     def render(self, params: GaussianRenderParams) -> torch.Tensor:
         centers = params.centers
         scales = params.scales
-        angles = params.angles
+        rotations = params.rotations
         alphas = params.alphas
         colors = params.colors
 
@@ -43,8 +43,8 @@ class GaussianRenderer:
         diff = grid.unsqueeze(0) - centers[:, None, None, :]
 
         if self.use_anisotropic:
-            cos_theta = torch.cos(angles)[:, None, None, 0]
-            sin_theta = torch.sin(angles)[:, None, None, 0]
+            cos_theta = rotations[:, None, None, 0]
+            sin_theta = rotations[:, None, None, 1]
             local_x = cos_theta * diff[..., 0] + sin_theta * diff[..., 1]
             local_y = -sin_theta * diff[..., 0] + cos_theta * diff[..., 1]
 
