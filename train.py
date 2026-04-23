@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from pathlib import Path
 
 import torch
 
 from config import Config, set_mode
-from evaluation import evaluate_prediction, save_comparison_visual, save_evaluation_report
 from models import Gaussian2DModel
 from renderer import GaussianRenderer
 from student.initializers import build_initializer
@@ -21,9 +21,54 @@ from utils import (
     plot_loss_curve,
     resolve_device,
     save_image,
+    save_image_panel,
     save_training_frame,
     set_seed,
 )
+
+
+@dataclass
+class EvalResult:
+    mse: float
+    mae: float
+    psnr: float
+
+
+def evaluate_prediction(prediction: torch.Tensor, target: torch.Tensor) -> EvalResult:
+    mse = torch.mean((prediction - target) ** 2).item()
+    mae = torch.mean(torch.abs(prediction - target)).item()
+    psnr = -10.0 * torch.log10(torch.tensor(mse + 1e-12)).item()
+    return EvalResult(mse=mse, mae=mae, psnr=psnr)
+
+
+def save_evaluation_report(
+    result: EvalResult,
+    path: str | Path,
+    optimizer_name: str,
+    init_name: str,
+    num_steps: int,
+    image_size: int,
+) -> None:
+    lines = [
+        "2DGS Evaluation Summary",
+        f"optimizer: {optimizer_name}",
+        f"initializer: {init_name}",
+        f"num_steps: {num_steps}",
+        f"image_size: {image_size}",
+        f"mse: {result.mse:.8f}",
+        f"mae: {result.mae:.8f}",
+        f"psnr: {result.psnr:.4f} dB",
+    ]
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def save_comparison_visual(target: torch.Tensor, prediction: torch.Tensor, path: str | Path) -> None:
+    error = torch.abs(prediction - target)
+    save_image_panel(
+        images=[target, prediction, error],
+        titles=["Target", "Prediction", "Absolute Error"],
+        path=path,
+    )
 
 
 def _apply_scheduler(optimizer, lr_scale: float) -> None:

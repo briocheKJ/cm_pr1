@@ -12,7 +12,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from config import Config, set_mode
-from evaluation import evaluate_prediction
 from models import Gaussian2DModel
 from renderer import GaussianRenderer
 from student.initializers import build_initializer
@@ -20,6 +19,7 @@ from student.losses import build_loss
 from student.optimizers import build_optimizer
 from student.schedulers import build_scheduler
 from target_generators import build_target_generator
+from train import evaluate_prediction
 from utils import ensure_dir, resolve_device, save_image, set_seed
 
 

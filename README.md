@@ -94,8 +94,6 @@ python train.py
 | `student/initializers.py` | **必交** | 消融 B：初始化策略实现 |
 | `student/schedulers.py` | **必交** | 消融 E：调度器实现 |
 | `experiments/competition_settings.py` | **必交** | 竞赛配置 |
-| `train.py` | **必交** | 训练入口 |
-| `config.py` | **必交** | 配置文件 |
 | 其他新增的 `student/*.py` | 按需提交 | 如果你新增了辅助模块，需一并提交 |
 
 即使某部分实验没有完全做完，上述必交文件仍需全部提交（可保留未实现的 stub），以便统一验收。不需要提交 `outputs/` 下的结果文件，图表和数值直接整理进报告即可。
