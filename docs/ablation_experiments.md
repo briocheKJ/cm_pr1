@@ -8,8 +8,8 @@
 
 | 项目 | 默认设置 |
 | ---- | ---- |
-| 图像 | `data/real_images/Starry_Night_256.png` |
-| 图像大小 | `256 x 256` |
+| 图像 | `data/real_images/Starry_Night_128.png` |
+| 图像大小 | `128 x 128` |
 | 高斯数量 | `100` |
 | 步数 | `200` |
 | Loss | `mse` |

@@ -8,7 +8,7 @@ def _build_locked_config(num_steps: int) -> Config:
 
     # Locked fields: do not modify these in the competition.
     config.system.seed = 42
-    config.target.image_size = 256
+    config.target.image_size = 128
     config.model.num_gaussians = 200
     config.render.bg_color = (0.0, 0.0, 0.0)
     config.train.num_steps = num_steps

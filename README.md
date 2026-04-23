@@ -179,8 +179,14 @@ python experiments/run_competition_local.py --config experiments/competition_set
 
 ## 补充说明
 
-- 竞赛评分细则仅供参考，后续可能微调。
+- 最终测试采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
 - 如需更细致的实验对比，可自行扩展可视化，仅供报告中的图像制作、帮助自己调试，无需上传这部分代码。
+
+## 参考文献
+
+- **3D Gaussian Splatting**: Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G. (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. ACM Transactions on Graphics, 42(4). https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/
+- **Adam**: Kingma, D. P., & Ba, J. (2015). *Adam: A Method for Stochastic Optimization*. ICLR 2015. https://arxiv.org/abs/1412.6980
+- **Muon**: Jordan, K. et al. (2024). *Muon: An optimizer for hidden layers in neural networks*. https://github.com/KellerJordan/Muon
 
 ## 学术诚信
 

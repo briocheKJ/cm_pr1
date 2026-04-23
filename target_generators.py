@@ -63,9 +63,8 @@ def _parse_line(values: list[float], line_idx: int, txt_path: Path) -> _Gaussian
 
 def render_txt_gaussians(
     txt_path: Path,
-    image_size: int = 256,
+    image_size: int = 128,
     bg_color: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    eps: float = 1e-6,
     device: torch.device | str = "cpu",
 ) -> torch.Tensor:
     """Read a txt file and render the described Gaussians into an image tensor [H, W, 3]."""
@@ -107,8 +106,7 @@ def render_txt_gaussians(
 
     bg = torch.tensor(bg_color, dtype=torch.float32, device=device)
     weighted_rgb = torch.einsum("nhw,nc->hwc", weights, colors)
-    weight_sum = weights.sum(dim=0).unsqueeze(-1)
-    image = (weighted_rgb + eps * bg.view(1, 1, 3)) / (weight_sum + eps)
+    image = bg.view(1, 1, 3) + weighted_rgb
     return image.clamp(0.0, 1.0)
 
 
@@ -153,7 +151,6 @@ class _TxtTarget:
             txt_path=project_root / self.config.target.gaussian_txt_path,
             image_size=self.config.target.image_size,
             bg_color=self.config.render.bg_color,
-            eps=self.config.render.eps,
             device=device,
         )
 

@@ -24,11 +24,11 @@ from utils import ensure_dir, resolve_device, save_image, set_seed
 
 
 TEST_IMAGES: list[dict[str, str]] = [
-    {"name": "R1_starry_night", "target_name": "image", "path": "data/real_images/Starry_Night_256.png"},
-    {"name": "R2_blackswan", "target_name": "image", "path": "data/real_images/blackswan_256.png"},
-    {"name": "R3_flamingo", "target_name": "image", "path": "data/real_images/flamingo_256.png"},
-    {"name": "R4_car_roundabout", "target_name": "image", "path": "data/real_images/car-roundabout_256.png"},
-    {"name": "R5_parkour", "target_name": "image", "path": "data/real_images/parkour_256.png"},
+    {"name": "R1_starry_night", "target_name": "image", "path": "data/real_images/Starry_Night_128.png"},
+    {"name": "R2_blackswan", "target_name": "image", "path": "data/real_images/blackswan_128.png"},
+    {"name": "R3_flamingo", "target_name": "image", "path": "data/real_images/flamingo_128.png"},
+    {"name": "R4_car_roundabout", "target_name": "image", "path": "data/real_images/car-roundabout_128.png"},
+    {"name": "R5_parkour", "target_name": "image", "path": "data/real_images/parkour_128.png"},
     {"name": "S1_translucent_stars", "target_name": "txt_gaussians", "path": "data/txt/t1_translucent_stars.txt"},
     {"name": "S2_colorful_stars", "target_name": "txt_gaussians", "path": "data/txt/t2_colorful_stars.txt"},
     {"name": "S3_sparse_colorful", "target_name": "txt_gaussians", "path": "data/txt/t3_sparse_colorful.txt"},
@@ -55,8 +55,8 @@ def validate_locked_fields(config: Config, num_steps: int) -> None:
     errors: list[str] = []
     if config.system.seed != 42:
         errors.append(f"seed must be 42, got {config.system.seed}")
-    if config.target.image_size != 256:
-        errors.append(f"image_size must be 256, got {config.target.image_size}")
+    if config.target.image_size != 128:
+        errors.append(f"image_size must be 128, got {config.target.image_size}")
     if config.model.num_gaussians != 200:
         errors.append(f"num_gaussians must be 200, got {config.model.num_gaussians}")
     if config.render.bg_color != (0.0, 0.0, 0.0):
@@ -90,7 +90,6 @@ def run_single_case(config: Config, test_image: dict[str, str], output_dir: Path
     renderer = GaussianRenderer(
         image_size=config.target.image_size,
         bg_color=config.render.bg_color,
-        eps=config.render.eps,
         use_anisotropic=config.model.use_anisotropic,
         use_alpha=config.model.use_alpha,
     )

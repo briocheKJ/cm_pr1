@@ -1,6 +1,5 @@
 # Teacher-only reference solutions
 _teacher_solutions/
-experiments/_teacher_only_run_ablation.py
 
 # Python
 __pycache__/
@@ -20,5 +19,4 @@ Thumbs.db
 *.swp
 *.swo
 
-# Data artifacts (keep source data, ignore generated previews)
-data/examples_png/
+experiments/competition_settings.py

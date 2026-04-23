@@ -23,7 +23,7 @@ def main() -> None:
         default="data/txt/t2_colorful_stars.txt",
         help="Path to the txt Gaussian spec file",
     )
-    parser.add_argument("--size", type=int, default=256, help="Output image size (default: 256)")
+    parser.add_argument("--size", type=int, default=128, help="Output image size (default: 128)")
     parser.add_argument("-o", "--output", type=str, default=None, help="Output image path")
     args = parser.parse_args()
 

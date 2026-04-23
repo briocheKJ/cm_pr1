@@ -7,23 +7,18 @@ from models import GaussianRenderParams
 
 class GaussianRenderer:
     """
-    Differentiable renderer for isotropic 2D Gaussians.
-
-    The renderer only knows how to map current Gaussian parameters to an RGB image.
-    It does not own the model parameters and does not perform optimization.
+    Differentiable renderer for 2D Gaussians.
     """
 
     def __init__(
         self,
         image_size: int,
         bg_color: tuple[float, float, float] = (0.0, 0.0, 0.0),
-        eps: float = 1e-6,
         use_anisotropic: bool = False,
         use_alpha: bool = False,
     ) -> None:
         self.image_size = image_size
         self.bg_color = bg_color
-        self.eps = eps
         self.use_anisotropic = use_anisotropic
         self.use_alpha = use_alpha
 
@@ -63,9 +58,9 @@ class GaussianRenderer:
             weights = base_weights
 
         weighted_rgb = torch.einsum("nhw,nc->hwc", weights, colors)  # [H, W, 3]
-        weight_sum = weights.sum(dim=0).unsqueeze(-1)  # [H, W, 1]
 
-        image = (weighted_rgb + self.eps * bg_color.view(1, 1, 3)) / (weight_sum + self.eps)
+        image = bg_color.view(1, 1, 3) + weighted_rgb
+
         return image.clamp(0.0, 1.0)
 
     def _build_pixel_grid(self, device: torch.device) -> torch.Tensor:

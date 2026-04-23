@@ -60,7 +60,6 @@ def train(config: Config) -> None:
     renderer = GaussianRenderer(
         image_size=config.target.image_size,
         bg_color=config.render.bg_color,
-        eps=config.render.eps,
         use_anisotropic=config.model.use_anisotropic,
         use_alpha=config.model.use_alpha,
     )

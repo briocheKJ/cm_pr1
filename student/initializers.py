@@ -17,14 +17,14 @@ class RandomGaussianInitializer:
         num_gaussians = model.num_gaussians
         device = model.center_raw.device
 
-        center_init = 0.1 + 0.8 * torch.rand(num_gaussians, 2, device=device)
-        sigma_init = 0.10 + 0.04 * torch.rand(num_gaussians, 1, device=device)
+        center_init = torch.rand(num_gaussians, 2, device=device)
+        sigma_init = 0.04 + 0.04 * torch.rand(num_gaussians, 1, device=device)
         scale_init = sigma_init.repeat(1, 2)
         rotation_init = torch.zeros(num_gaussians, 2, device=device)
         rotation_init[:, 0] = 1.0
-        alpha_value = 0.1 if self.config.model.use_alpha else 1.0
+        alpha_value = 0.2 if self.config.model.use_alpha else 1.0
         alpha_init = torch.full((num_gaussians, 1), alpha_value, device=device)
-        color_init = 0.5 + 0.05 * torch.randn(num_gaussians, 3, device=device)
+        color_init = 0.5 + 0.3 * torch.randn(num_gaussians, 3, device=device)
         color_init = color_init.clamp(0.05, 0.95)
 
         model.set_raw_parameters(

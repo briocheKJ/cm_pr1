@@ -31,8 +31,8 @@ class SystemConfig:
 @dataclass
 class TargetConfig:
     name: str = "image"           # "image" | "txt_gaussians" | "synthetic_shapes"
-    image_size: int = 256
-    image_path: str = "data/real_images/Starry_Night_256.png"
+    image_size: int = 128
+    image_path: str = "data/real_images/Starry_Night_128.png"
     gaussian_txt_path: str = "data/txt/t2_colorful_stars.txt"
 
 
