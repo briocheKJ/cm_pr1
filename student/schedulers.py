@@ -9,15 +9,15 @@ def constant_schedule(step: int, total_steps: int) -> float:
     return 1.0
 
 
-def cosine_schedule(step: int, total_steps: int, min_lr_scale: float = 0.01) -> float:
+def cosine_schedule(step: int, total_steps: int) -> float:
     raise NotImplementedError("TODO: implement cosine_schedule")
 
 
-def warmup_cosine_schedule(step: int, total_steps: int, warmup_steps: int, min_lr_scale: float = 0.01) -> float:
+def warmup_cosine_schedule(step: int, total_steps: int) -> float:
     raise NotImplementedError("TODO: implement warmup_cosine_schedule")
 
 
-def step_decay_schedule(step: int, total_steps: int, step_size: int = 100, gamma: float = 0.5, min_lr_scale: float = 0.01) -> float:
+def step_decay_schedule(step: int, total_steps: int) -> float:
     raise NotImplementedError("TODO: implement step_decay_schedule")
 
 
@@ -32,14 +32,10 @@ def build_scheduler(config: SchedulerConfig) -> Callable[[int, int], float]:
         return build_teacher_scheduler(config)
 
     if name == "cosine":
-        return lambda step, total: cosine_schedule(step, total, min_lr_scale=0.01)
+        return cosine_schedule
     if name == "warmup_cosine":
-        return lambda step, total: warmup_cosine_schedule(
-            step, total, warmup_steps=0, min_lr_scale=0.01,
-        )
+        return warmup_cosine_schedule
     if name == "step_decay":
-        return lambda step, total: step_decay_schedule(
-            step, total, step_size=100, gamma=0.5, min_lr_scale=0.01,
-        )
+        return step_decay_schedule
 
     raise ValueError(f"Unknown scheduler name: {name}")

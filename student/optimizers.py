@@ -16,10 +16,7 @@ class StudentSGD:
         self.param_groups = param_groups
 
     def zero_grad(self) -> None:
-        for group in self.param_groups:
-            for param in group["params"]:
-                if param.grad is not None:
-                    param.grad.zero_()
+        raise NotImplementedError("TODO: implement SGD zero_grad()")
 
     def step(self) -> None:
         raise NotImplementedError("TODO: implement SGD step()")
@@ -31,10 +28,7 @@ class StudentMomentum:
         self.velocity: dict[int, torch.Tensor] = {}
 
     def zero_grad(self) -> None:
-        for group in self.param_groups:
-            for param in group["params"]:
-                if param.grad is not None:
-                    param.grad.zero_()
+        raise NotImplementedError("TODO: implement Momentum zero_grad()")
 
     def step(self) -> None:
         raise NotImplementedError("TODO: implement Momentum step()")
@@ -47,10 +41,7 @@ class StudentAdam:
         self.state: dict[int, dict[str, torch.Tensor]] = {}
 
     def zero_grad(self) -> None:
-        for group in self.param_groups:
-            for param in group["params"]:
-                if param.grad is not None:
-                    param.grad.zero_()
+        raise NotImplementedError("TODO: implement Adam zero_grad()")
 
     def step(self) -> None:
         raise NotImplementedError("TODO: implement Adam step()")
@@ -63,10 +54,7 @@ class StudentAdamW:
         self.state: dict[int, dict[str, torch.Tensor]] = {}
 
     def zero_grad(self) -> None:
-        for group in self.param_groups:
-            for param in group["params"]:
-                if param.grad is not None:
-                    param.grad.zero_()
+        raise NotImplementedError("TODO: implement AdamW zero_grad()")
 
     def step(self) -> None:
         raise NotImplementedError("TODO: implement AdamW step()")
@@ -78,10 +66,7 @@ class StudentMuon:
         self.buffers: dict[int, torch.Tensor] = {}
 
     def zero_grad(self) -> None:
-        for group in self.param_groups:
-            for param in group["params"]:
-                if param.grad is not None:
-                    param.grad.zero_()
+        raise NotImplementedError("TODO: implement Muon zero_grad()")
 
     def step(self) -> None:
         raise NotImplementedError("TODO: implement Muon step()")

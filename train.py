@@ -99,7 +99,7 @@ def train(config: Config) -> None:
         losses.append(loss.item())
         metric_tracker.log(
             step=step,
-            metrics=getattr(loss_fn, "last_metrics", {"total_loss": loss.item()}),
+            metrics={"total_loss": loss.item()},
         )
 
         if step == 1 or step % config.train.print_every == 0 or step == config.train.num_steps:

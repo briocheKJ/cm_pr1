@@ -40,15 +40,6 @@ class GridGaussianInitializer:
         self.config = config
 
     def initialize(self, model: Gaussian2DModel, target_image: torch.Tensor | None = None) -> None:
-        del target_image
-        num_gaussians = model.num_gaussians
-        device = model.center_raw.device
-
-        _ = math.ceil(math.sqrt(num_gaussians))
-        _ = device
-        _ = inverse_sigmoid
-        _ = inverse_softplus
-
         raise NotImplementedError("TODO: implement grid initialization")
 
 

@@ -28,7 +28,7 @@ python train.py
 
 默认配置定义在 [config.py](config.py) 中。
 
-运行后可以立刻查看可视化输出。下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
+运行成功训练结束后，结果会默认保存到 `outputs/`。通常会包含目标图、最终重建图、若干中间结果、训练曲线以及最终评估结果。如果开启 `config.train.save_video`，还会额外导出优化过程动画和对应的视频帧。下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
 
 <p align="center">
   <img src="docs/comparison_baseline.png" width="720" alt="Baseline comparison">
@@ -41,7 +41,7 @@ python train.py
 
 1. 实验目标：
 
-- 理解教学版 2D Gaussian Splatting 的基本训练流程。实现并比较不同的 loss、初始化策略、优化器、模型设计与学习率调度器，在统一基线下完成消融实验，具体配置说明在。
+- 理解教学版 2D Gaussian Splatting 的基本训练流程。实现并比较不同的 loss、初始化策略、优化器、模型设计与学习率调度器，在统一基线下完成消融实验，具体说明在[docs/ablation_experiments.md](docs/ablation_experiments.md)。
 - 完成竞赛部分，具体配置说明在[docs/competition.md](docs/competition.md)。
 
 2. 建议完成顺序：
@@ -64,17 +64,12 @@ python train.py
 | 竞赛 Standard（500步迭代）| 20% |
 | 合计 | 100% |
 
-4. 最低必做项：
 
-| 类型 | 文件 |
-| ---- | ---- |
-| 必做 | [student/losses.py](student/losses.py) |
-| 必做 | [student/schedulers.py](student/schedulers.py) |
-| 必做 | [student/optimizers.py](student/optimizers.py) |
-| 必做 | [student/initializers.py](student/initializers.py) |
-| 选做 | [student/optimizers.py](student/optimizers.py) 中的 muon 优化器 |
+4. 实现约束：
 
-建议先完成所有必做项，再进入竞赛部分。
+- 在 `student/` 目录下自行实现的核心算法，不得直接调用 PyTorch 中对应的现成库函数完成任务。
+- 例如：自己实现的 loss 不应直接调用 `torch.nn.functional` 中现成的对应 loss；自己实现的优化器不应直接调用 `torch.optim` 中对应优化器；自己实现的 scheduler 也不应直接调用现成调度器。
+- 可以继续使用 PyTorch 的张量运算、自动求导和基础数学操作，但核心公式与更新规则需要自行写出。
 
 ## 三、提交要求
 
@@ -155,26 +150,8 @@ python train.py
 | Optimizer | [student/optimizers.py](student/optimizers.py) | 实现 SGD、Momentum、Adam、AdamW（选做：Muon） |
 | Initializer | [student/initializers.py](student/initializers.py) | 实现高斯初始化方法 |
 
-## 五、训练输出
 
-训练结束后，默认会在 `outputs/` 下保存：
-
-- `target.png`：目标图像。
-- `final_reconstruction.png`：最终重建结果。
-- `comparison.png`：目标图、重建图与绝对误差对比。
-- `loss_curve.png`：总 loss 曲线。
-- `metric_curves.png`：训练指标曲线。
-- `metrics.json`：逐步记录的训练指标。
-- `evaluation.txt`：最终评估指标。
-- `recon_step_*.png`：训练过程中的中间结果。
-
-若 `config.train.save_video = True`，还会额外导出：
-
-- `optimization.mp4`：优化过程动画。
-- `video_frames/frame_*.png`：生成动画时保存的中间帧。
-
-
-## 六、竞赛自测
+## 五、竞赛自测
 
 1. 复制模板以新建竞赛配置文件：
 
@@ -213,4 +190,4 @@ python experiments/run_competition_local.py --config experiments/competition_set
 - 可以与同学讨论思路，但不得直接交换代码、实验结果或报告文本。
 - 不得抄袭或改写他人实现后冒充为自己的工作。
 - 如使用课外资料、工具或生成式 AI，请遵守课程要求并如实说明用途。
-- 提交的代码、结果和分析必须与本人实际实现一致。
+- 提交的代码、结果和分析必须与本人实际实现一致。如出现报告数值与本人实现不一致的情况，将严肃处理。
