@@ -37,22 +37,7 @@
 
 ## 测试集
 
-竞赛使用 10 张测试图像：
-
-| 编号 | 类型 | 文件 |
-| ---- | ---- | ---- |
-| R1 | RGB | `data/real_images/Starry_Night_256.png` |
-| R2 | RGB | `data/real_images/blackswan_256.png` |
-| R3 | RGB | `data/real_images/flamingo_256.png` |
-| R4 | RGB | `data/real_images/car-roundabout_256.png` |
-| R5 | RGB | `data/real_images/parkour_256.png` |
-| S1 | txt | `data/txt/t1_translucent_stars.txt` |
-| S2 | txt | `data/txt/t2_colorful_stars.txt` |
-| S3 | txt | `data/txt/t3_sparse_colorful.txt` |
-| S4 | txt | `data/txt/t4_dense_cluster.txt` |
-| S5 | txt | `data/txt/t5_anisotropic_mix.txt` |
-
-最终成绩取 10 张图的平均 PSNR。
+竞赛使用10张测试图像，包括5张真实图像和5张合成图像。最终成绩取10张图的平均PSNR。
 
 真实图像示意：
 
@@ -80,3 +65,17 @@
 
 总分 = Sprint + Standard，满分 40。
 
+## 验收内容
+
+竞赛部分验收时，至少需要看到以下内容：
+
+- `competition_settings.py`：必交，且其中需要给出 `get_sprint_setting()` 和 `get_standard_setting()`。
+- 报告中的竞赛结果：至少包含 Sprint 和 Standard 两个赛道的结果。
+- 简短说明：说明你最终采用了哪些设置，以及为什么这样设计。
+
+如果你只做配置搜索，没有改动算法实现，那么只需提交 `competition_settings.py`。如果你修改了优化器、初始化器、loss 或 scheduler 的实现，那么除了 `competition_settings.py`，还需要提交所有改过的 `student/*.py` 文件。
+
+补充说明：
+
+- 如果你新增了优化器、初始化器、loss 或 scheduler，需要在对应的 `build_*` 函数中完成注册。
+- 不需要单独提交竞赛运行产生的 `outputs/` 结果文件，结果图表和数值直接整理进报告即可。

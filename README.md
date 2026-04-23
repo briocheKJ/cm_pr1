@@ -14,14 +14,6 @@
 
 ## 一、快速开始
 
-下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
-
-<p align="center">
-  <img src="docs/comparison_baseline.png" width="720" alt="Baseline comparison">
-  <br>
-  <em>左：目标图像 | 中：高斯重建 | 右：绝对误差</em>
-</p>
-
 1. 安装依赖：
 
 ```bash
@@ -36,13 +28,21 @@ python train.py
 
 默认配置定义在 [config.py](config.py) 中。
 
+运行后可以立刻查看可视化输出。下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
+
+<p align="center">
+  <img src="docs/comparison_baseline.png" width="720" alt="Baseline comparison">
+  <br>
+  <em>左：目标图像 | 中：高斯重建 | 右：绝对误差</em>
+</p>
+
+
 ## 二、实验要求
 
 1. 实验目标：
 
-- 理解教学版 2D Gaussian Splatting 的基本训练流程。
-- 实现并比较不同的 loss、初始化策略、优化器、模型设计与学习率调度器。
-- 在统一基线下完成消融实验，并进一步参加课程竞赛。
+- 理解教学版 2D Gaussian Splatting 的基本训练流程。实现并比较不同的 loss、初始化策略、优化器、模型设计与学习率调度器，在统一基线下完成消融实验，具体配置说明在。
+- 完成竞赛部分，具体配置说明在[docs/competition.md](docs/competition.md)。
 
 2. 建议完成顺序：
 
@@ -76,44 +76,43 @@ python train.py
 
 建议先完成所有必做项，再进入竞赛部分。
 
-## 三、实验报告要求
+## 三、提交要求
 
-1. 报告建议结构：
+### 1. 实验报告
 
-- （a）实验设置：
-  简要说明你使用的基线配置，以及实现了哪些模块。
-- （b）消融实验结果：
-  按 A-E 五个消融实验整理结果。每部分至少给出结果表，并统一汇报 `PSNR / MSE / MAE`。
-- （c）结果分析：
-  结合 loss 曲线、重建图、误差图分析不同方法的收敛速度、稳定性和最终效果。
-- （d）竞赛结果：
-  单独汇报 Sprint 和 Standard 两个赛道的结果，并简要说明最终采用的设计，阐述原因。
-- （e）结论：
-  总结哪些设计有效，哪些设计效果一般，以及你对该任务的主要观察。补充说明如果要提升这个任务，还能想到哪些优化方法。
+实验报告请以 `pdf` 格式提交。建议至少包含以下内容：
 
-2. 报告中建议至少包含以下内容：
+- 实验设置：简要说明你使用的基线配置，以及实现了哪些模块。
+- 消融实验结果：按 A-E 五个消融实验整理结果。每部分至少给出结果表，并统一汇报 `PSNR / MSE / MAE`。
+- 结果分析：结合 loss 曲线、重建图、误差图分析不同方法的收敛速度、稳定性和最终效果。
+- 竞赛结果：单独汇报 Sprint 和 Standard 两个赛道的结果，并简要说明最终采用的设计及原因。
+- 总结：概括哪些设计有效，哪些设计效果一般，以及你对该任务的主要观察。
 
-- （a）默认基线结果。
-- （b）五个消融实验的结果表。
-- （c）若干代表性的 loss 曲线或指标曲线。
-- （d）若干代表性的重建对比图或误差图。
-- （e）竞赛部分的最终数值结果与设计说明。
+### 2. 代码
 
-3. 提交内容：
+代码部分应保证可直接运行。建议至少包含：
 
-- （a）实验报告：`pdf` 格式。
-- （b）代码：可直接运行的 Python 代码。
+- `train.py`
+- `config.py`
+- `student/losses.py`
+- `student/optimizers.py`
+- `student/initializers.py`
+- `student/schedulers.py`
+- `experiments/competition_settings.py`
 
-4. 压缩包组织示例：
+
+### 3. 压缩包组织示例
 
 ```text
 姓名_学号_Project1_v1.zip
 |
 |-- report.pdf
 |
-|-- minimal_2dgs/
+|-- code/
 |   |-- train.py
 |   |-- config.py
+|   |-- experiments/
+|   |   |-- competition_settings.py
 |   |-- student/
 |   |   |-- losses.py
 |   |   |-- optimizers.py
@@ -121,8 +120,6 @@ python train.py
 |   |   |-- schedulers.py
 |   |-- ...
 ```
-
-如课程主页对文件命名或提交方式有额外要求，以课程主页为准。
 
 ## 四、你主要会看哪些文件
 
@@ -153,37 +150,33 @@ python train.py
 
 | 模块 | 文件 | 说明 |
 | ---- | ---- | ---- |
-| Loss | [student/losses.py](student/losses.py) | 实现 `l1`、`charbonnier`、`mse_l1`、`mse_edge` |
+| Loss | [student/losses.py](student/losses.py) | 实现 `l1`、`mse_l1`、`mse_edge` |
 | Scheduler | [student/schedulers.py](student/schedulers.py) | 实现 `cosine`、`warmup_cosine`、`step_decay` |
 | Optimizer | [student/optimizers.py](student/optimizers.py) | 实现 SGD、Momentum、Adam、AdamW（选做：Muon） |
-| Initializer | [student/initializers.py](student/initializers.py) | 实现 `grid` 和 `image_sample` 初始化 |
+| Initializer | [student/initializers.py](student/initializers.py) | 实现高斯初始化方法 |
 
 ## 五、训练输出
 
 训练结束后，默认会在 `outputs/` 下保存：
 
 - `target.png`：目标图像。
-- `reconstruction_final.png`：最终重建结果。
+- `final_reconstruction.png`：最终重建结果。
 - `comparison.png`：目标图、重建图与绝对误差对比。
 - `loss_curve.png`：总 loss 曲线。
 - `metric_curves.png`：训练指标曲线。
-- `metric_history.json`：逐步记录的训练指标。
-- `metrics.txt`：最终评估指标。
+- `metrics.json`：逐步记录的训练指标。
+- `evaluation.txt`：最终评估指标。
 - `recon_step_*.png`：训练过程中的中间结果。
 
-若 `config.train.save_video = True`，还会额外导出优化过程动画。
+若 `config.train.save_video = True`，还会额外导出：
 
-## 六、文档导航
+- `optimization.mp4`：优化过程动画。
+- `video_frames/frame_*.png`：生成动画时保存的中间帧。
 
-- [docs/problem_formulation.md](docs/problem_formulation.md)：优化问题形式化。
-- [docs/ablation_experiments.md](docs/ablation_experiments.md)：消融实验要求。
-- [docs/competition.md](docs/competition.md)：竞赛规则与提交方式。
 
-## 七、竞赛自测
+## 六、竞赛自测
 
-如果你要参加竞赛，建议先复制模板文件，再做本地自测。
-
-1. 新建竞赛配置文件：
+1. 复制模板以新建竞赛配置文件：
 
 ```bash
 cp experiments/competition_settings_template.py experiments/competition_settings.py
@@ -206,24 +199,13 @@ python experiments/run_competition_local.py --config experiments/competition_set
 - `--track both` 会依次跑两个赛道。
 - `--limit 2` 表示只跑前 2 张测试图，适合先检查代码是否能正常运行。
 
-## 八、代码结构
 
-- `train.py`：训练入口与主训练循环。
-- `config.py`：结构化配置。
-- `models.py`：高斯参数模型。
-- `renderer.py`：可微渲染器。
-- `student/`：学生需要修改的代码，包括 `losses.py`、`optimizers.py`、`initializers.py`、`schedulers.py`。
-- `target_generators.py`：目标图生成与 txt 高斯渲染。
-- `generate_target.py`：单独生成目标图像，用于预览和调试。
-- `evaluation.py`：评估指标与可视化保存。
-- `experiments/`：竞赛 setting 模板与本地自测脚本。
-
-## 九、补充说明
+## 补充说明
 
 - 竞赛评分细则仅供参考，后续可能微调。
 - 如需更细致的实验对比，可自行扩展可视化，仅供报告中的图像制作、帮助自己调试，无需上传这部分代码。
 
-## 十、学术诚信
+## 学术诚信
 
 请独立完成本次作业。
 
