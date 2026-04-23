@@ -29,18 +29,7 @@
 - 可视化结果：至少给出 `loss curve` 或最终重建对比图。
 - 简短分析：说明方法变化带来的影响。
 
-代码提交时，需要至少提交以下 4 个文件：
-
-- `student/losses.py`
-- `student/optimizers.py`
-- `student/initializers.py`
-- `student/schedulers.py`
-
-补充说明：
-
-- 即使某一部分实验没有完全做完，也需要提交这 4 个文件，便于统一验收。
-- 如果你在这 4 个文件之外还新增了辅助实现，也需要一并提交。
-- 不需要单独提交 `outputs/` 下的结果文件，图表和数值直接整理进实验报告即可。
+代码提交要求详见 [README.md](../README.md) 中的提交要求部分。
 
 
 ## 五个消融实验总表

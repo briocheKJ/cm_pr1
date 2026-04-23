@@ -85,16 +85,20 @@ python train.py
 
 ### 2. 代码
 
-代码部分应保证可直接运行。建议至少包含：
+代码部分应保证可直接运行。提交文件说明如下：
 
-- `train.py`
-- `config.py`
-- `student/losses.py`
-- `student/optimizers.py`
-- `student/initializers.py`
-- `student/schedulers.py`
-- `experiments/competition_settings.py`
+| 文件 | 是否必交 | 说明 |
+| ---- | ---- | ---- |
+| `student/losses.py` | **必交** | 消融 A：loss 实现 |
+| `student/optimizers.py` | **必交** | 消融 C：优化器实现 |
+| `student/initializers.py` | **必交** | 消融 B：初始化策略实现 |
+| `student/schedulers.py` | **必交** | 消融 E：调度器实现 |
+| `experiments/competition_settings.py` | **必交** | 竞赛配置 |
+| `train.py` | **必交** | 训练入口 |
+| `config.py` | **必交** | 配置文件 |
+| 其他新增的 `student/*.py` | 按需提交 | 如果你新增了辅助模块，需一并提交 |
 
+即使某部分实验没有完全做完，上述必交文件仍需全部提交（可保留未实现的 stub），以便统一验收。不需要提交 `outputs/` 下的结果文件，图表和数值直接整理进报告即可。
 
 ### 3. 压缩包组织示例
 
@@ -179,8 +183,11 @@ python experiments/run_competition_local.py --config experiments/competition_set
 
 ## 补充说明
 
-- 最终测试采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
+- 最终竞赛测试采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
 - 如需更细致的实验对比，可自行扩展可视化，仅供报告中的图像制作、帮助自己调试，无需上传这部分代码。
+- 竞赛部分的合成数据集源文件已经提供，方便同学调试，但不得利用数据作弊，包括但不限于：直接读取数据集初始化，在代码中写大量的针对数据的硬编码。
+- 助教将会抽查提交的代码。对于与报告内容严重不符、作弊、违反诚信的内容予以严肃处理。
+- 本库中文档与代码发生矛盾时，以文档内容优先。
 
 ## 参考文献
 
@@ -197,3 +204,5 @@ python experiments/run_competition_local.py --config experiments/competition_set
 - 不得抄袭或改写他人实现后冒充为自己的工作。
 - 如使用课外资料、工具或生成式 AI，请遵守课程要求并如实说明用途。
 - 提交的代码、结果和分析必须与本人实际实现一致。如出现报告数值与本人实现不一致的情况，将严肃处理。
+
+祝实验顺利！
