@@ -28,7 +28,7 @@ python train.py
 
 默认配置定义在 [config.py](config.py) 中。
 
-运行成功训练结束后，结果会默认保存到 `outputs/`。通常会包含目标图、最终重建图、若干中间结果、训练曲线以及最终评估结果。如果开启 `config.train.save_video`，还会额外导出优化过程动画和对应的视频帧。下图展示了默认配置（r1_flamingo，1000 个高斯，random 初始化，MSE loss，torch.optim实现的Adam 优化器）在 200 步训练后的效果：
+运行成功训练结束后，结果会默认保存到 `outputs/`。通常会包含目标图、最终重建图、若干中间结果、训练曲线以及最终评估结果。如果开启 `config.train.save_video`，还会额外导出优化过程动画和对应的视频帧。下图展示了默认配置（r1_flamingo，1000 个高斯，random 初始化，MSE loss，仓库内置的 `torch_adam` 参考基线，其内部调用 `torch.optim.Adam`）在 200 步训练后的效果：
 
 <p align="center">
   <img src="docs/comparison_baseline.png" width="720" alt="Baseline comparison">
@@ -45,8 +45,8 @@ python train.py
 
 | # | 算法 | 文件 | 具体内容 |
 | ---- | ---- | ---- | ---- |
-| 1 | Loss 函数 | [student/losses.py](student/losses.py) | 实现至少2种loss |
-| 2 | 初始化策略 | [student/initializers.py](student/initializers.py) | 实现至少 1 种图像感知初始化（如基于目标图像采样的 `image_sample`） |
+| 1 | Loss 函数 | [student/losses.py](student/losses.py) | 实现至少3种loss |
+| 2 | 初始化策略 | [student/initializers.py](student/initializers.py) | 实现至少 2 种图像感知初始化（如基于目标图像采样的 `image_sample`） |
 | 3 | 优化器 | [student/optimizers.py](student/optimizers.py) | 实现 SGD、SGD+Momentum、Adam、AdamW（选做：Muon） |
 | 4 | 学习率调度器 | [student/schedulers.py](student/schedulers.py) | 实现 Cosine Annealing、Warmup+Cosine、Step Decay |
 
