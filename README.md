@@ -39,20 +39,35 @@ python train.py
 
 ## 二、实验要求
 
-1. 实验目标：
+### 需要实现的算法
 
-- 理解教学版 2D Gaussian Splatting 的基本训练流程。
-- 完成任务1，主题是消融实验：围绕 loss、初始化策略、优化器、模型设计与学习率调度器展开对比分析，具体说明见 [docs/ablation_experiments.md](docs/ablation_experiments.md)。
-- 完成任务2，目标是最大化给定要求配置下的PSNR，具体要求见 [docs/competition.md](docs/competition.md)。
+本实验要求你在 `student/` 目录下实现以下算法，并围绕它们完成消融实验（任务 1）和配置优化（任务 2）。
 
-2. 建议完成顺序：
+| # | 算法 | 文件 | 具体内容 |
+| ---- | ---- | ---- | ---- |
+| 1 | Loss 函数 | [student/losses.py](student/losses.py) | 实现至少2种loss |
+| 2 | 初始化策略 | [student/initializers.py](student/initializers.py) | 实现至少 1 种图像感知初始化（如基于目标图像采样的 `image_sample`） |
+| 3 | 优化器 | [student/optimizers.py](student/optimizers.py) | 实现 SGD、SGD+Momentum、Adam、AdamW（选做：Muon） |
+| 4 | 学习率调度器 | [student/schedulers.py](student/schedulers.py) | 实现 Cosine Annealing、Warmup+Cosine、Step Decay |
 
-- 先运行默认基线，确认训练流程与输出结果正常。
-- 再补全指定源码文件。
-- 按模块完成任务 1。
-- 最后整理最佳配置并完成任务 2。
+每个文件中已提供接口定义和 `TODO` 标记，按提示补全即可。实现完成后：
 
-3. 评分构成：
+- **任务 1**（消融实验）：逐模块对比不同算法对重建效果的影响，详见 [docs/ablation_experiments.md](docs/ablation_experiments.md)。
+- **任务 2**（配置优化）：自由组合上述模块与超参数，最大化 PSNR，详见 [docs/competition.md](docs/competition.md)。
+
+### 实现约束
+
+- 核心公式与更新规则需要自行写出，不得直接调用 PyTorch 中对应的现成库函数（如 `torch.nn.functional` 中的 loss、`torch.optim` 中的优化器等）。
+- 可以继续使用 PyTorch 的张量运算、自动求导和基础数学操作。
+
+### 建议完成顺序
+
+1. 运行默认基线，确认训练流程与输出结果正常。
+2. 补全 `student/` 下的四个文件。
+3. 按模块完成任务 1 的消融实验。
+4. 整理最佳配置并完成任务 2。
+
+### 评分构成
 
 | 部分 | 占比 |
 | ---- | ---- |
@@ -61,16 +76,9 @@ python train.py
 | 任务 1C：优化器消融 | 12% |
 | 任务 1D：模型设计消融 | 12% |
 | 任务 1E：学习率调度器消融 | 12% |
-| 任务 2A：100步迭代优化 | 20% |
-| 任务 2B：500步迭代优化 | 20% |
+| 任务 2A：100 步迭代优化 | 20% |
+| 任务 2B：500 步迭代优化 | 20% |
 | 合计 | 100% |
-
-
-4. 实现约束：
-
-- 在 `student/` 目录下自行实现的核心算法，不得直接调用 PyTorch 中对应的现成库函数完成任务。
-- 例如：自己实现的 loss 不应直接调用 `torch.nn.functional` 中现成的对应 loss；自己实现的优化器不应直接调用 `torch.optim` 中对应优化器；自己实现的 scheduler 也不应直接调用现成调度器。
-- 可以继续使用 PyTorch 的张量运算、自动求导和基础数学操作，但核心公式与更新规则需要自行写出。
 
 ## 三、提交要求
 

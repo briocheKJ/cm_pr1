@@ -47,7 +47,7 @@ $$ w_i(p;\Theta) = \alpha_i \exp\left( -\frac{1}{2}(p-\mu_i)^\top \Sigma_i^{-1}(
 
 $$ I_\Theta(p) = \text{clamp}\!\left( c_{bg} + \sum_{i=1}^N w_i(p;\Theta)\,c_i,\; 0,\; 1 \right), \qquad p \in \Omega $$
 
-其中 $c_{bg}$ 为背景色（默认为黑色，即 $(0,0,0)$）。这是一个非归一化的累加模型：每个高斯按自身的权重直接叠加颜色贡献， $\alpha_i$ 控制该高斯的不透明度。最终结果截断到 $[0,1]$。
+其中 $c_{bg}$ 为背景色（默认为黑色，即 $(0,0,0)$）。这是一个非归一化的累加模型：每个高斯按自身的权重直接叠加颜色贡献， $\alpha_i$ 控制该高斯的不透明度。最终结果截断到 $[0,1]$。本实验的参数化建模和渲染模型与3DGS仍然有很大差别，也并未单独为本实验编写独立的CUDA内核加速，感兴趣的同学可以自行阅读[3D Gaussian Splatting原文](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)。
 
 ---
 
