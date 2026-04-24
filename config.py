@@ -32,13 +32,13 @@ class SystemConfig:
 class TargetConfig:
     name: str = "image"           # "image" | "txt_gaussians" | "synthetic_shapes"
     image_size: int = 128
-    image_path: str = "data/real_images/Starry_Night_128.png"
-    gaussian_txt_path: str = "data/txt/t2_colorful_stars.txt"
+    image_path: str = "data/real_images/r1_flamingo_128.png"
+    gaussian_txt_path: str = "data/txt/s1_night_cityscape.txt"
 
 
 @dataclass
 class ModelConfig:
-    num_gaussians: int = 100
+    num_gaussians: int = 1000
     use_anisotropic: bool = True
     use_alpha: bool = True
 

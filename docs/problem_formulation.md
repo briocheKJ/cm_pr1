@@ -88,7 +88,7 @@ $$ \boxed{\min_{\Theta} \mathcal{L}(\Theta)} $$
 $$ \mathrm{PSNR} = 10 \log_{10}\frac{1}{\mathrm{MSE}} $$
 
 因此，当损失函数采用 MSE 时，**最小化 MSE 等价于最大化 PSNR**。  
-这也是为什么竞赛部分采用平均 PSNR 作为最终评分指标。
+这也是为什么任务 2 采用平均 PSNR 作为评分指标。
 
 ---
 

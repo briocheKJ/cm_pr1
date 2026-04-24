@@ -169,7 +169,7 @@ def main() -> None:
     parser.add_argument(
         "txt_path",
         nargs="?",
-        default="data/txt/t2_colorful_stars.txt",
+        default="data/txt/s1_night_cityscape.txt",
         help="Path to the txt Gaussian spec file",
     )
     parser.add_argument("--size", type=int, default=128, help="Output image size")

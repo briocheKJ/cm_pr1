@@ -18,7 +18,7 @@ class RandomGaussianInitializer:
         device = model.center_raw.device
 
         center_init = torch.rand(num_gaussians, 2, device=device)
-        sigma_init = 0.04 + 0.04 * torch.rand(num_gaussians, 1, device=device)
+        sigma_init = 0.01 + 0.01 * torch.rand(num_gaussians, 1, device=device)
         scale_init = sigma_init.repeat(1, 2)
         rotation_init = torch.zeros(num_gaussians, 2, device=device)
         rotation_init[:, 0] = 1.0

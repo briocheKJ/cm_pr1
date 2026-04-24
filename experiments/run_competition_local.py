@@ -24,16 +24,12 @@ from utils import ensure_dir, resolve_device, save_image, set_seed
 
 
 TEST_IMAGES: list[dict[str, str]] = [
-    {"name": "R1_starry_night", "target_name": "image", "path": "data/real_images/Starry_Night_128.png"},
-    {"name": "R2_blackswan", "target_name": "image", "path": "data/real_images/blackswan_128.png"},
-    {"name": "R3_flamingo", "target_name": "image", "path": "data/real_images/flamingo_128.png"},
-    {"name": "R4_car_roundabout", "target_name": "image", "path": "data/real_images/car-roundabout_128.png"},
-    {"name": "R5_parkour", "target_name": "image", "path": "data/real_images/parkour_128.png"},
-    {"name": "S1_translucent_stars", "target_name": "txt_gaussians", "path": "data/txt/t1_translucent_stars.txt"},
-    {"name": "S2_colorful_stars", "target_name": "txt_gaussians", "path": "data/txt/t2_colorful_stars.txt"},
-    {"name": "S3_sparse_colorful", "target_name": "txt_gaussians", "path": "data/txt/t3_sparse_colorful.txt"},
-    {"name": "S4_dense_cluster", "target_name": "txt_gaussians", "path": "data/txt/t4_dense_cluster.txt"},
-    {"name": "S5_anisotropic_mix", "target_name": "txt_gaussians", "path": "data/txt/t5_anisotropic_mix.txt"},
+    {"name": "R1_flamingo", "target_name": "image", "path": "data/real_images/r1_flamingo_128.png"},
+    {"name": "R2_starry_night", "target_name": "image", "path": "data/real_images/r2_starry_night_128.png"},
+    {"name": "R3_parkour", "target_name": "image", "path": "data/real_images/r3_parkour_128.png"},
+    {"name": "S1_night_cityscape", "target_name": "txt_gaussians", "path": "data/txt/s1_night_cityscape.txt"},
+    {"name": "S2_mandala", "target_name": "txt_gaussians", "path": "data/txt/s2_mandala.txt"},
+    {"name": "S3_coral_reef", "target_name": "txt_gaussians", "path": "data/txt/s3_coral_reef.txt"},
 ]
 
 
@@ -57,15 +53,15 @@ def validate_locked_fields(config: Config, num_steps: int) -> None:
         errors.append(f"seed must be 42, got {config.system.seed}")
     if config.target.image_size != 128:
         errors.append(f"image_size must be 128, got {config.target.image_size}")
-    if config.model.num_gaussians != 200:
-        errors.append(f"num_gaussians must be 200, got {config.model.num_gaussians}")
+    if config.model.num_gaussians != 1000:
+        errors.append(f"num_gaussians must be 1000, got {config.model.num_gaussians}")
     if config.render.bg_color != (0.0, 0.0, 0.0):
         errors.append(f"bg_color must be (0, 0, 0), got {config.render.bg_color}")
     if config.train.num_steps != num_steps:
         errors.append(f"num_steps must be {num_steps}, got {config.train.num_steps}")
 
     if errors:
-        raise ValueError("Locked competition fields were modified:\n" + "\n".join(errors))
+        raise ValueError("Locked task-2 fields were modified:\n" + "\n".join(errors))
 
 
 def run_single_case(config: Config, test_image: dict[str, str], output_dir: Path) -> float:
@@ -149,18 +145,18 @@ def run_track(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Local competition self-check")
+    parser = argparse.ArgumentParser(description="Local task-2 self-check")
     parser.add_argument(
         "--config",
         type=str,
         default="experiments/competition_settings_template.py",
-        help="Path to competition settings file.",
+        help="Path to task-2 settings file.",
     )
     parser.add_argument(
         "--track",
         choices=["sprint", "standard", "both"],
         default="both",
-        help="Which competition track to run.",
+        help="Which task-2 setting to run.",
     )
     parser.add_argument(
         "--limit",
@@ -172,7 +168,7 @@ def main() -> None:
         "--output",
         type=str,
         default="outputs_competition_local",
-        help="Output directory for local competition runs.",
+        help="Output directory for local task-2 runs.",
     )
     parser.add_argument(
         "--mode",
@@ -188,13 +184,13 @@ def main() -> None:
 
     if args.track in {"sprint", "both"}:
         if not hasattr(module, "get_sprint_setting"):
-            raise AttributeError("Competition settings file must define get_sprint_setting()")
-        run_track("Sprint", module.get_sprint_setting, 100, output_dir, args.limit)
+            raise AttributeError("Task-2 settings file must define get_sprint_setting()")
+        run_track("Task2A", module.get_sprint_setting, 100, output_dir, args.limit)
 
     if args.track in {"standard", "both"}:
         if not hasattr(module, "get_standard_setting"):
-            raise AttributeError("Competition settings file must define get_standard_setting()")
-        run_track("Standard", module.get_standard_setting, 500, output_dir, args.limit)
+            raise AttributeError("Task-2 settings file must define get_standard_setting()")
+        run_track("Task2B", module.get_standard_setting, 500, output_dir, args.limit)
 
 
 if __name__ == "__main__":

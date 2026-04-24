@@ -2,14 +2,14 @@
 
 一幅图像由许多微粒共同构成。每个微粒对应一个可学习的 2D Gaussian，具有位置、尺度、颜色，以及可选透明度。本实验的任务是：给定一张目标图像，利用一组可学习的 2D Gaussians 对其进行重建，并比较不同设计对优化效果的影响。
 
-本仓库提供了可运行基线，以及 loss、初始化策略、优化器、学习率调度器等扩展接口，供消融实验和竞赛使用。优化问题的形式化定义见 [docs/problem_formulation.md](docs/problem_formulation.md)。
+本仓库提供了可运行基线，以及 loss、初始化策略、优化器、学习率调度器等扩展接口，供任务 1 和任务 2 使用。优化问题的形式化定义见 [docs/problem_formulation.md](docs/problem_formulation.md)。
 
-优化过程中，高斯微粒会逐步移动、缩放并变色，从而逼近目标图像：
+下图展示了 `flamingo` 目标图像在 `image_sample` 初始化下的优化过程：
 
 <p align="center">
-  <img src="docs/optimization_progress.png" width="720" alt="Optimization progress">
+  <img src="docs/teaser.gif" width="720" alt="Optimization teaser">
   <br>
-  <em>从左到右：第 50 / 100 / 150 / 200 步的重建结果</em>
+  <em>flamingo，image_sample 初始化，优化过程动画</em>
 </p>
 
 ## 一、快速开始
@@ -28,12 +28,12 @@ python train.py
 
 默认配置定义在 [config.py](config.py) 中。
 
-运行成功训练结束后，结果会默认保存到 `outputs/`。通常会包含目标图、最终重建图、若干中间结果、训练曲线以及最终评估结果。如果开启 `config.train.save_video`，还会额外导出优化过程动画和对应的视频帧。下图展示了基线配置（100 个高斯，MSE loss，Adam 优化器）在 200 步训练后的效果：
+运行成功训练结束后，结果会默认保存到 `outputs/`。通常会包含目标图、最终重建图、若干中间结果、训练曲线以及最终评估结果。如果开启 `config.train.save_video`，还会额外导出优化过程动画和对应的视频帧。下图展示了默认配置（r1_flamingo，1000 个高斯，random 初始化，MSE loss，torch.optim实现的Adam 优化器）在 200 步训练后的效果：
 
 <p align="center">
   <img src="docs/comparison_baseline.png" width="720" alt="Baseline comparison">
   <br>
-  <em>左：目标图像 | 中：高斯重建 | 右：绝对误差</em>
+  <em>左：r1_flamingo 目标图像 | 中：random 基线重建 | 右：绝对误差</em>
 </p>
 
 
@@ -41,27 +41,28 @@ python train.py
 
 1. 实验目标：
 
-- 理解教学版 2D Gaussian Splatting 的基本训练流程。实现并比较不同的 loss、初始化策略、优化器、模型设计与学习率调度器，在统一基线下完成消融实验，具体说明在[docs/ablation_experiments.md](docs/ablation_experiments.md)。
-- 完成竞赛部分，具体配置说明在[docs/competition.md](docs/competition.md)。
+- 理解教学版 2D Gaussian Splatting 的基本训练流程。
+- 完成任务1，主题是消融实验：围绕 loss、初始化策略、优化器、模型设计与学习率调度器展开对比分析，具体说明见 [docs/ablation_experiments.md](docs/ablation_experiments.md)。
+- 完成任务2，目标是最大化给定要求配置下的PSNR，具体要求见 [docs/competition.md](docs/competition.md)。
 
 2. 建议完成顺序：
 
 - 先运行默认基线，确认训练流程与输出结果正常。
 - 再补全指定源码文件。
-- 按模块完成消融实验。
-- 最后整理最佳配置并完成竞赛部分。
+- 按模块完成任务 1。
+- 最后整理最佳配置并完成任务 2。
 
 3. 评分构成：
 
 | 部分 | 占比 |
 | ---- | ---- |
-| 消融 A：Loss 函数 | 12% |
-| 消融 B：初始化策略 | 12% |
-| 消融 C：优化器 | 12% |
-| 消融 D：模型设计 | 12% |
-| 消融 E：学习率调度器 | 12% |
-| 竞赛 Sprint（100步迭代） | 20% |
-| 竞赛 Standard（500步迭代）| 20% |
+| 任务 1A：Loss 函数消融 | 12% |
+| 任务 1B：初始化策略消融 | 12% |
+| 任务 1C：优化器消融 | 12% |
+| 任务 1D：模型设计消融 | 12% |
+| 任务 1E：学习率调度器消融 | 12% |
+| 任务 2A：100步迭代优化 | 20% |
+| 任务 2B：500步迭代优化 | 20% |
 | 合计 | 100% |
 
 
@@ -78,9 +79,9 @@ python train.py
 实验报告请以 `pdf` 格式提交。建议至少包含以下内容：
 
 - 实验设置：简要说明你使用的基线配置，以及实现了哪些模块。
-- 消融实验结果：按 A-E 五个消融实验整理结果。每部分至少给出结果表，并统一汇报 `PSNR / MSE / MAE`。
+- 任务 1 结果：按任务 1A-1E 五个部分整理结果。每部分至少给出结果表，并统一汇报 `PSNR / MSE / MAE`。
 - 结果分析：结合 loss 曲线、重建图、误差图分析不同方法的收敛速度、稳定性和最终效果。并分析结果的可靠性，以及产生这样结果的原因。
-- 竞赛结果：单独汇报 Sprint 和 Standard 两个赛道的结果，并简要说明最终采用的设计及原因。
+- 任务 2 结果：单独汇报 100 步设置和 500 步设置的结果，并简要说明最终采用的设计及原因。
 - 总结：概括哪些设计有效，哪些设计效果一般，以及你对该任务的主要观察。
 
 ### 2. 代码
@@ -89,11 +90,11 @@ python train.py
 
 | 文件 | 是否必交 | 说明 |
 | ---- | ---- | ---- |
-| `student/losses.py` | **必交** | 消融 A：loss 实现 |
-| `student/optimizers.py` | **必交** | 消融 C：优化器实现 |
-| `student/initializers.py` | **必交** | 消融 B：初始化策略实现 |
-| `student/schedulers.py` | **必交** | 消融 E：调度器实现 |
-| `experiments/competition_settings.py` | **必交** | 竞赛配置 |
+| `student/losses.py` | **必交** | 任务 1A：loss 实现 |
+| `student/optimizers.py` | **必交** | 任务 1C：优化器实现 |
+| `student/initializers.py` | **必交** | 任务 1B：初始化策略实现 |
+| `student/schedulers.py` | **必交** | 任务 1E：调度器实现 |
+| `experiments/competition_settings.py` | **必交** | 任务 2 配置 |
 | 其他新增的 `student/*.py` | 按需提交 | 如果你新增了辅助模块，需一并提交 |
 
 即使某部分实验没有完全做完，上述必交文件仍需全部提交（可保留未实现的 stub），以便统一验收。不需要提交 `outputs/` 下的结果文件，图表和数值直接整理进报告即可。
@@ -118,44 +119,26 @@ python train.py
 |   |-- ...
 ```
 
-## 四、你主要会看哪些文件
+## 四、文件说明
 
-第一次阅读代码时，不需要把整个项目全部看一遍。对大多数同学来说，先理解下面这几个文件即可：
-
-- [config.py](config.py)
-- [train.py](train.py)
-- [student/losses.py](student/losses.py)
-- [student/optimizers.py](student/optimizers.py)
-- [student/initializers.py](student/initializers.py)
-- [student/schedulers.py](student/schedulers.py)
-
-1. 配置入口：
-
-- [config.py](config.py)：集中定义目标图、模型、训练步数、loss、优化器、学习率调度器等配置。
-
-2. 常见修改项：
-
-- `config.target`：目标图来源、图像尺寸、txt 路径。
-- `config.model`：高斯数量、是否启用各向异性、是否启用 alpha。
-- `config.initializer`：初始化策略。
-- `config.loss`：loss 类型。
-- `config.optimizer`：优化器类型、学习率与参数组学习率缩放。
-- `config.scheduler`：学习率调度器。
-- `config.train`：训练步数、保存频率、是否导出动画。
-
-3. 主要作业文件：
-
-| 模块 | 文件 | 说明 |
-| ---- | ---- | ---- |
-| Loss | [student/losses.py](student/losses.py) | 实现 `l1`、`mse_l1`、`mse_edge` |
-| Scheduler | [student/schedulers.py](student/schedulers.py) | 实现 `cosine`、`warmup_cosine`、`step_decay` |
-| Optimizer | [student/optimizers.py](student/optimizers.py) | 实现 SGD、Momentum、Adam、AdamW（选做：Muon） |
-| Initializer | [student/initializers.py](student/initializers.py) | 实现高斯初始化方法 |
+| 文件 | 说明 |
+| ---- | ---- |
+| [config.py](config.py) | 全局配置：目标图、模型、训练、loss、优化器、调度器等参数 |
+| [train.py](train.py) | 训练主循环 |
+| [models.py](models.py) | 2D Gaussian 模型定义与参数约束 |
+| [renderer.py](renderer.py) | 可微分高斯渲染器 |
+| [target_generators.py](target_generators.py) | 目标图像加载与合成 |
+| [student/losses.py](student/losses.py) | **作业**：实现 `l1`、`mse_l1`、`mse_edge` |
+| [student/optimizers.py](student/optimizers.py) | **作业**：实现 SGD、Momentum、Adam、AdamW（选做：Muon） |
+| [student/initializers.py](student/initializers.py) | **作业**：实现高斯初始化方法 |
+| [student/schedulers.py](student/schedulers.py) | **作业**：实现 `cosine`、`warmup_cosine`、`step_decay` |
+| [experiments/competition_settings_template.py](experiments/competition_settings_template.py) | 任务 2 配置模板 |
+| [experiments/run_competition_local.py](experiments/run_competition_local.py) | 任务 2 本地自测脚本 |
 
 
-## 五、竞赛自测
+## 五、任务 2 自测
 
-1. 复制模板以新建竞赛配置文件：
+1. 复制模板以新建任务 2 配置文件：
 
 ```bash
 cp experiments/competition_settings_template.py experiments/competition_settings.py
@@ -165,7 +148,7 @@ cp experiments/competition_settings_template.py experiments/competition_settings
 
 - `get_sprint_setting()`
 - `get_standard_setting()`
-2. 同时测试两个赛道：
+2. 同时测试两种步数设置：
 
 ```bash
 python experiments/run_competition_local.py --config experiments/competition_settings.py --track both
@@ -173,17 +156,17 @@ python experiments/run_competition_local.py --config experiments/competition_set
 
 说明：
 
-- `--track sprint` 只跑 100 步赛道。
-- `--track standard` 只跑 500 步赛道。
-- `--track both` 会依次跑两个赛道。
+- `--track sprint` 只跑 100 步设置。
+- `--track standard` 只跑 500 步设置。
+- `--track both` 会依次跑两种设置。
 - `--limit 2` 表示只跑前 2 张测试图，适合先检查代码是否能正常运行。
 
 
 ## 补充说明
 
-- 最终竞赛测试采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
+- 任务 2 采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
 - 如需更细致的实验对比，可自行扩展可视化，仅供报告中的图像制作、帮助自己调试，无需上传这部分代码。
-- 竞赛部分的合成数据集源文件已经提供，方便同学调试，但不得利用数据作弊，包括但不限于：直接读取数据集初始化，在代码中写大量的针对数据的硬编码。
+- 任务 2 的合成数据集源文件已经提供，方便同学调试，但不得利用数据作弊，包括但不限于：直接读取数据集初始化，在代码中写大量的针对数据的硬编码。
 - 助教将会抽查提交的代码。对于与报告内容严重不符、作弊、违反诚信的内容予以严肃处理。
 - 本库中文档与代码发生矛盾时，以文档内容优先。
 

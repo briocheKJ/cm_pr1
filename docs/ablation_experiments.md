@@ -8,9 +8,9 @@
 
 | 项目 | 默认设置 |
 | ---- | ---- |
-| 图像 | `data/real_images/Starry_Night_128.png` |
+| 图像 | `data/real_images/r1_flamingo_128.png` |
 | 图像大小 | `128 x 128` |
-| 高斯数量 | `100` |
+| 高斯数量 | `1000` |
 | 步数 | `200` |
 | Loss | `mse` |
 | Optimizer | `torch_adam` |
