@@ -53,7 +53,7 @@ python train.py
 每个文件中已提供接口定义和 `TODO` 标记，按提示补全即可。实现完成后：
 
 - **任务 1**（消融实验）：逐模块对比不同算法对重建效果的影响，详见 [docs/ablation_experiments.md](docs/ablation_experiments.md)。
-- **任务 2**（配置优化）：自由组合上述模块与超参数，最大化 PSNR，详见 [docs/competition.md](docs/competition.md)。
+- **任务 2**（配置优化）：自由组合上述模块与超参数，最大化 PSNR，详见 [docs/assignment2.md](docs/assignment2.md)。
 
 ### 实现约束
 
@@ -102,7 +102,7 @@ python train.py
 | `student/optimizers.py` | **必交** | 任务 1C：优化器实现 |
 | `student/initializers.py` | **必交** | 任务 1B：初始化策略实现 |
 | `student/schedulers.py` | **必交** | 任务 1E：调度器实现 |
-| `experiments/competition_settings.py` | **必交** | 任务 2 配置 |
+| `experiments/assignment2_settings.py` | **必交** | 任务 2 配置 |
 | 其他新增的 `student/*.py` | 按需提交 | 如果你新增了辅助模块，需一并提交 |
 
 即使某部分实验没有完全做完，上述必交文件仍需全部提交（可保留未实现的 stub），以便统一验收。不需要提交 `outputs/` 下的结果文件，图表和数值直接整理进报告即可。
@@ -118,7 +118,7 @@ python train.py
 |   |-- train.py
 |   |-- config.py
 |   |-- experiments/
-|   |   |-- competition_settings.py
+|   |   |-- assignment2_settings.py
 |   |-- student/
 |   |   |-- losses.py
 |   |   |-- optimizers.py
@@ -140,39 +140,29 @@ python train.py
 | [student/optimizers.py](student/optimizers.py) | **作业**：实现 SGD、Momentum、Adam、AdamW（选做：Muon） |
 | [student/initializers.py](student/initializers.py) | **作业**：实现高斯初始化方法 |
 | [student/schedulers.py](student/schedulers.py) | **作业**：实现 `cosine`、`warmup_cosine`、`step_decay` |
-| [experiments/competition_settings_template.py](experiments/competition_settings_template.py) | 任务 2 配置模板 |
-| [experiments/run_competition_local.py](experiments/run_competition_local.py) | 任务 2 本地自测脚本 |
+| [experiments/assignment2_settings.py](experiments/assignment2_settings.py) | 任务 2 配置（直接编辑此文件） |
+| [experiments/run_assignment2.py](experiments/run_assignment2.py) | 任务 2 本地自测脚本 |
 
 
 ## 五、任务 2 自测
 
-1. 复制模板以新建任务 2 配置文件：
+1. 编辑 `experiments/assignment2_settings.py`，填写 `get_sprint_setting()` 和 `get_standard_setting()` 中的配置。
+
+2. 运行自测：
 
 ```bash
-cp experiments/competition_settings_template.py experiments/competition_settings.py
+python experiments/run_assignment2.py --track both
 ```
-
-然后在 `experiments/competition_settings.py` 中填写：
-
-- `get_sprint_setting()`
-- `get_standard_setting()`
-2. 同时测试两种步数设置：
-
-```bash
-python experiments/run_competition_local.py --config experiments/competition_settings.py --track both
-```
-
-说明：
 
 - `--track sprint` 只跑 100 步设置。
 - `--track standard` 只跑 500 步设置。
-- `--track both` 会依次跑两种设置。
-- `--limit 2` 表示只跑前 2 张测试图，适合先检查代码是否能正常运行。
+- `--track both` 依次跑两种设置。
+- `--limit 2` 只跑前 2 张测试图，适合快速检查代码是否正常运行。
 
 
 ## 补充说明
 
-- 任务 2 采用固定 PSNR 阈值评分，具体规则见 [docs/competition.md](docs/competition.md)。
+- 任务 2 采用固定 PSNR 阈值评分，具体规则见 [docs/assignment2.md](docs/assignment2.md)。
 - 如需更细致的实验对比，可自行扩展可视化，仅供报告中的图像制作、帮助自己调试，无需上传这部分代码。
 - 任务 2 的合成数据集源文件已经提供，方便同学调试，但不得利用数据作弊，包括但不限于：直接读取数据集初始化，在代码中写大量的针对数据的硬编码。
 - 助教将会抽查提交的代码。对于与报告内容严重不符、作弊、违反诚信的内容予以严肃处理。

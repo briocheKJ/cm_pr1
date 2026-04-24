@@ -36,9 +36,9 @@ TEST_IMAGES: list[dict[str, str]] = [
 def load_settings_module(path: str) -> ModuleType:
     config_path = Path(path).resolve()
     if not config_path.exists():
-        raise FileNotFoundError(f"Competition settings file not found: {config_path}")
+        raise FileNotFoundError(f"Assignment 2 settings file not found: {config_path}")
 
-    spec = importlib.util.spec_from_file_location("competition_settings", config_path)
+    spec = importlib.util.spec_from_file_location("assignment2_settings", config_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot import settings from: {config_path}")
 
@@ -149,7 +149,7 @@ def main() -> None:
     parser.add_argument(
         "--config",
         type=str,
-        default="experiments/competition_settings_template.py",
+        default="experiments/assignment2_settings.py",
         help="Path to task-2 settings file.",
     )
     parser.add_argument(
@@ -167,7 +167,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=str,
-        default="outputs_competition_local",
+        default="outputs_assignment2",
         help="Output directory for local task-2 runs.",
     )
     parser.add_argument(
@@ -184,12 +184,12 @@ def main() -> None:
 
     if args.track in {"sprint", "both"}:
         if not hasattr(module, "get_sprint_setting"):
-            raise AttributeError("Task-2 settings file must define get_sprint_setting()")
+            raise AttributeError("assignment2_settings.py must define get_sprint_setting()")
         run_track("Task2A", module.get_sprint_setting, 100, output_dir, args.limit)
 
     if args.track in {"standard", "both"}:
         if not hasattr(module, "get_standard_setting"):
-            raise AttributeError("Task-2 settings file must define get_standard_setting()")
+            raise AttributeError("assignment2_settings.py must define get_standard_setting()")
         run_track("Task2B", module.get_standard_setting, 500, output_dir, args.limit)
 
 

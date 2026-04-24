@@ -52,13 +52,13 @@
 真实图像示意：
 
 <p align="center">
-  <img src="competition_real_images.png" width="720" alt="Competition real images">
+  <img src="assignment2_real_images.png" width="720" alt="Real test images">
 </p>
 
 合成目标示意：
 
 <p align="center">
-  <img src="competition_synthetic_images.png" width="720" alt="Competition synthetic images">
+  <img src="assignment2_synthetic_images.png" width="720" alt="Synthetic test images">
 </p>
 
 ## 评分
