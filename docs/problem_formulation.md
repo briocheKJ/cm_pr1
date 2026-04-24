@@ -31,7 +31,7 @@ $$ \Theta = (\theta_1, \theta_2, \dots, \theta_N) $$
 
 说明：
 
-- 当 `use_anisotropic = False` 时，$\Sigma_i = \sigma_i^2 I$，即各向同性高斯；
+- 当 `use_anisotropic = False` 时， $\Sigma_i=\sigma_i^2I$，即各向同性高斯；
 - 当 `use_alpha = False` 时，可视为 $\alpha_i = 1$，即不透明。
 - 在代码实现中，并不是直接优化矩阵 $\Sigma_i$，而是用可学习的 `scale` 与归一化旋转方向来参数化它；对于二维旋转，这个方向可以理解为 $(cos\phi,\sin\phi)$。
 
@@ -47,7 +47,7 @@ $$ w_i(p;\Theta) = \alpha_i \exp\left( -\frac{1}{2}(p-\mu_i)^\top \Sigma_i^{-1}(
 
 $$ I_\Theta(p) = \text{clamp}\!\left( c_{bg} + \sum_{i=1}^N w_i(p;\Theta)\,c_i,\; 0,\; 1 \right), \qquad p \in \Omega $$
 
-其中 $c_{bg}$ 为背景色（默认为黑色，即 $(0,0,0)$）。这是一个非归一化的累加模型：每个高斯按自身的权重直接叠加颜色贡献，$\alpha_i$ 控制该高斯的不透明度。最终结果截断到 $[0,1]$。
+其中 $c_{bg}$ 为背景色（默认为黑色，即 $(0,0,0)$）。这是一个非归一化的累加模型：每个高斯按自身的权重直接叠加颜色贡献， $\alpha_i$ 控制该高斯的不透明度。最终结果截断到 $[0,1]$。
 
 ---
 
