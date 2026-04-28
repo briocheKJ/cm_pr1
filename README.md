@@ -114,8 +114,6 @@ python train.py
 |-- report.pdf
 |
 |-- code/
-|   |-- train.py
-|   |-- config.py
 |   |-- experiments/
 |   |   |-- assignment2_settings.py
 |   |-- student/
@@ -123,7 +121,6 @@ python train.py
 |   |   |-- optimizers.py
 |   |   |-- initializers.py
 |   |   |-- schedulers.py
-|   |-- ...
 ```
 
 ## 四、文件说明
